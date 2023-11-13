@@ -1,19 +1,26 @@
 buildscript {
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
     }
 }
 
 repositories {
     google()
+    mavenLocal()
     mavenCentral()
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion rootProject.tools.compileSdk
+    namespace 'com.infomaniak.lib.pdfview.sample'
+
+    compileSdk rootProject.tools.compileSdk
 
     defaultConfig {
         minSdkVersion rootProject.tools.minSdk
@@ -27,11 +34,15 @@ android {
             }
         }
     }
+
+    buildFeatures { viewBinding true }
 }
 
 dependencies {
     implementation project(':android-pdf-viewer')
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'org.androidannotations:androidannotations-api:4.6.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.10.0'
     annotationProcessor "org.androidannotations:androidannotations:4.6.0"
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="infomaniak">#0098FF</color>
+    <color name="infomaniakDark">#0079CC</color>
+    <color name="accent">@color/infomaniak</color>
+    <color name="primary">@color/infomaniak</color>
+    <color name="primaryDark">@color/infomaniakDark</color>
+</resources>
