@@ -1,7 +1,9 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion rootProject.tools.compileSdk
+    namespace 'com.infomaniak.lib.pdfview'
+
+    compileSdk rootProject.tools.compileSdk
 
     defaultConfig {
         minSdkVersion rootProject.tools.minSdk
@@ -14,14 +16,12 @@ android {
 
 dependencies {
     implementation 'androidx.core:core:1.7.0'
-    api 'com.github.mhiew:pdfium-android:1.9.2'
+    api 'com.github.infomaniak:pdfiumandroid:1.9.3-snapshot-final3'
 }
 
 // Maven Publishing
 ext {
-    PUBLISH_GROUP_ID = 'com.github.mhiew'
+    PUBLISH_GROUP_ID = 'com.github.infomaniak'
     PUBLISH_VERSION = "${rootProject.tools.versionName}"
     PUBLISH_ARTIFACT_ID = 'android-pdf-viewer'
 }
-
-apply from: "${rootProject.projectDir}/android-pdf-viewer/publish-mavencentral.gradle"
