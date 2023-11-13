@@ -13,6 +13,8 @@ buildscript {
     }
 }
 
+apply plugin: 'maven-publish'
+
 allprojects {
     repositories {
         google()
@@ -27,6 +29,6 @@ ext {
             minSdk      : 21,
             targetSdk   : 34,
             compileSdk  : 34,
-            versionName: '3.2.0-beta.3'
+            versionName: '3.2.1'
     ]
 }
