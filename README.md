@@ -1,5 +1,5 @@
 
-#### This is a fork of the [AndroidPdfViewer](https://github.com/barteksc/AndroidPdfViewer)
+#### This is a fork of the [AndroidPdfViewer](https://github.com/mhiew/AndroidPdfViewer)
 switch back to the mainline repo when it gets migrated off JCenter
 
 
@@ -10,7 +10,7 @@ repo, where can be developed independently. Version 1.x uses different engine fo
 so if you don't like 2.x version, try 1.x.__
 
 Library for displaying PDF documents on Android, with `animations`, `gestures`, `zoom` and `double tap` support.
-It is based on [PdfiumAndroid](https://github.com/barteksc/PdfiumAndroid) for decoding PDF files. Works on API 11 (Android 3.0) and higher.
+It is based on [PdfiumAndroid](https://github.com/infomaniak/PdfiumAndroid) for decoding PDF files. Works on API 11 (Android 3.0) and higher.
 Licensed under Apache License 2.0.
 
 ## 3.2.0-beta.3
@@ -70,7 +70,7 @@ If you are using ProGuard, add following rule to proguard config file:
 ## Include PDFView in your layout
 
 ``` xml
-<com.github.barteksc.pdfviewer.PDFView
+<com.infomaniak.lib.pdfview.PDFView
         android:id="@+id/pdfView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -147,7 +147,7 @@ All methods are documented as Javadoc comments on interface [source](https://git
 ## Document sources
 Version 2.3.0 introduced _document sources_, which are just providers for PDF documents.
 Every provider implements **DocumentSource** interface.
-Predefined providers are available in **com.github.barteksc.pdfviewer.source** package and can be used as
+Predefined providers are available in **com.infomaniak.lib.pdfview.source** package and can be used as
 samples for creating custom ones.
 
 Predefined providers can be used with shorthand methods:
