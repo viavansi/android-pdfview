@@ -1010,6 +1010,16 @@ public class PDFView extends RelativeLayout {
     }
 
     /**
+     * Set touch priority to the PDFView. Use this method if you use the PDFView
+     * in a ViewPager, RecyclerView, etc. to avoid any problems when dragging while zoomed in.
+     *
+     * @param hasPriority true if you want the PDFView to disable touch capabilities of the first parent RecyclerView
+     */
+    public void setTouchPriority(boolean hasPriority) {
+        dragPinchManager.setHasTouchPriority(hasPriority);
+    }
+
+    /**
      * @return true if single page fills the entire screen in the scrolling direction
      */
     public boolean pageFillsScreen() {
@@ -1386,6 +1396,7 @@ public class PDFView extends RelativeLayout {
         private boolean pageSnap = false;
 
         private boolean nightMode = false;
+        private boolean touchPriority = false;
 
         private Configurator(DocumentSource documentSource) {
             this.documentSource = documentSource;
@@ -1531,6 +1542,11 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
+        public Configurator touchPriority(boolean hasPriority) {
+            this.touchPriority = hasPriority;
+            return this;
+        }
+
         public void load() {
             if (!hasSize) {
                 waitingDocumentConfigurator = this;
@@ -1562,6 +1578,7 @@ public class PDFView extends RelativeLayout {
             PDFView.this.setFitEachPage(fitEachPage);
             PDFView.this.setPageSnap(pageSnap);
             PDFView.this.setPageFling(pageFling);
+            PDFView.this.setTouchPriority(touchPriority);
 
             if (pageNumbers != null) {
                 PDFView.this.load(documentSource, password, pageNumbers);
