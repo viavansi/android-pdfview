@@ -30,7 +30,7 @@ public class FileUtils {
     }
 
     public static File fileFromAsset(Context context, String assetName) throws IOException {
-        File outFile = new File(context.getCacheDir(), assetName + "-com.infomaniak.lib.pdfview.pdf");
+        File outFile = new File(context.getCacheDir(), assetName + "-pdfview.pdf");
         if (assetName.contains("/")) {
             outFile.getParentFile().mkdirs();
         }
