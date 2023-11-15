@@ -1,6 +1,6 @@
 
 buildscript {
-    project.ext.kotlinVersion = '1.7.22'
+    project.ext.kotlinVersion = '1.8.22'
 
     repositories {
         google()

@@ -35,6 +35,13 @@ android {
     }
 
     buildFeatures { viewBinding true }
+
+    def javaVersion = JavaVersion.VERSION_17
+
+    compileOptions {
+        sourceCompatibility javaVersion
+        targetCompatibility javaVersion
+    }
 }
 
 dependencies {
