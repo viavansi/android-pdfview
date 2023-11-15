@@ -56,19 +56,16 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     }
 
     private fun pickFile() {
-        val permissionCheck = ContextCompat.checkSelfPermission(this,
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+            val permissionCheck = ContextCompat.checkSelfPermission(this,
                 READ_EXTERNAL_STORAGE)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU){
-                READ_MEDIA_IMAGES
-            } else {
-                READ_EXTERNAL_STORAGE
-            }
-            ActivityCompat.requestPermissions(
-                    this, arrayOf(permission),
+            if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(READ_EXTERNAL_STORAGE),
                     PERMISSION_CODE
-            )
-            return
+                )
+                return
+            }
         }
         launchPicker()
     }
