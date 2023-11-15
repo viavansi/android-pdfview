@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.EditText;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -78,7 +79,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         this.hasTouchPriority = hasTouchPriority;
     }
 
-    void disableLongpress(){
+    void disableLongpress() {
         gestureDetector.setIsLongpressEnabled(false);
     }
 
@@ -316,7 +317,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         }
 
         if (hasTouchPriority) {
-            retVal = handleTouchPriority(event, v);
+            handleTouchPriority(event, v);
         }
 
         return retVal;
@@ -324,15 +325,18 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
 
     private ViewParent getViewToDisableTouch(View startingView) {
         ViewParent parentView = startingView.getParent();
-        while (!(((View) parentView) instanceof RecyclerView)) {
+        while (parentView != null && !(parentView instanceof RecyclerView)) {
             parentView = parentView.getParent();
         }
         return parentView;
     }
 
-    private boolean handleTouchPriority(MotionEvent event, View view) {
+    private void handleTouchPriority(MotionEvent event, View view) {
         ViewParent viewToDisableTouch = getViewToDisableTouch(view);
-        if (event.getPointerCount() >= 2 || view.canScrollHorizontally(1) && view.canScrollHorizontally(-1)) {
+        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
+        boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
+        if (viewToDisableTouch != null &&
+                (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_MOVE:
@@ -343,7 +347,6 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
                     break;
             }
         }
-        return true;
     }
 
     private void hideHandle() {
