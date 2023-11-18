@@ -1,26 +1,33 @@
 
 buildscript {
+    project.ext.kotlinVersion = '1.8.22'
+
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:8.1.3'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
+
+apply plugin: 'maven-publish'
 
 allprojects {
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
 ext {
     tools = [
-            minSdk      : 19,
-            targetSdk   : 31,
-            compileSdk  : 31,
-            versionName: '3.2.0-beta.3'
+            minSdk      : 21,
+            targetSdk   : 34,
+            compileSdk  : 34,
+            versionName: '3.2.1'
     ]
 }
