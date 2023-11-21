@@ -22,6 +22,7 @@ android {
 
 dependencies {
     implementation 'androidx.core:core:1.12.0'
+    // Cannot replace api by implementation because of the sample
     api 'com.github.infomaniak:pdfiumandroid:1.9.6'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
 }
