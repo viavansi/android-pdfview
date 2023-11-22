@@ -24,6 +24,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewParent;
+import android.widget.EditText;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.infomaniak.lib.pdfview.model.LinkTapEvent;
 import com.infomaniak.lib.pdfview.scroll.ScrollHandle;
@@ -35,7 +39,10 @@ import com.shockwave.pdfium.util.SizeF;
  * This Manager takes care of moving the PDFView,
  * set its zoom track user actions.
  */
-class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
+class DragPinchManager implements GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener,
+        ScaleGestureDetector.OnScaleGestureListener,
+        View.OnTouchListener {
 
     private PDFView pdfView;
     private AnimationManager animationManager;
@@ -46,6 +53,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     private boolean scrolling = false;
     private boolean scaling = false;
     private boolean enabled = false;
+    private boolean hasTouchPriority = false;
 
     DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
@@ -63,7 +71,15 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         enabled = false;
     }
 
-    void disableLongpress(){
+    boolean hasTouchPriority() {
+        return hasTouchPriority;
+    }
+
+    void setHasTouchPriority(boolean hasTouchPriority) {
+        this.hasTouchPriority = hasTouchPriority;
+    }
+
+    void disableLongpress() {
         gestureDetector.setIsLongpressEnabled(false);
     }
 
@@ -299,7 +315,38 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
                 onScrollEnd(event);
             }
         }
+
+        if (hasTouchPriority) {
+            handleTouchPriority(event, v);
+        }
+
         return retVal;
+    }
+
+    private ViewParent getViewToDisableTouch(View startingView) {
+        ViewParent parentView = startingView.getParent();
+        while (parentView != null && !(parentView instanceof RecyclerView)) {
+            parentView = parentView.getParent();
+        }
+        return parentView;
+    }
+
+    private void handleTouchPriority(MotionEvent event, View view) {
+        ViewParent viewToDisableTouch = getViewToDisableTouch(view);
+        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
+        boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
+        if (viewToDisableTouch != null &&
+                (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
+                    break;
+            }
+        }
     }
 
     private void hideHandle() {
