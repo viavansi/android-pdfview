@@ -25,7 +25,6 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewParent;
-import android.widget.EditText;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,10 +38,8 @@ import com.shockwave.pdfium.util.SizeF;
  * This Manager takes care of moving the PDFView,
  * set its zoom track user actions.
  */
-class DragPinchManager implements GestureDetector.OnGestureListener,
-        GestureDetector.OnDoubleTapListener,
-        ScaleGestureDetector.OnScaleGestureListener,
-        View.OnTouchListener {
+class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener,
+        ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 
     private PDFView pdfView;
     private AnimationManager animationManager;
@@ -119,8 +116,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             pageX = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
         }
         for (PdfDocument.Link link : pdfFile.getPageLinks(page)) {
-            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(),
-                    (int) pageSize.getHeight(), link.getBounds());
+            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(), (int) pageSize.getHeight(),
+                    link.getBounds());
             mapped.sort();
             if (mapped.contains(mappedX, mappedY)) {
                 pdfView.callbacks.callLinkHandler(new LinkTapEvent(x, y, mappedX, mappedY, mapped, link));
@@ -130,7 +127,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         return false;
     }
 
-    private void startPageFling(MotionEvent downEvent, MotionEvent ev, float velocityX, float velocityY) {
+    private void startPageFling(MotionEvent downEvent, MotionEvent ev, float velocityX,
+                                float velocityY) {
         if (!checkDoPageFling(velocityX, velocityY)) {
             return;
         }
@@ -142,7 +140,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             direction = velocityX > 0 ? -1 : 1;
         }
         // get the focused page during the down event to ensure only a single page is changed
-        float delta = pdfView.isSwipeVertical() ? ev.getY() - downEvent.getY() : ev.getX() - downEvent.getX();
+        float delta = pdfView.isSwipeVertical() ? ev.getY() - downEvent.getY() :
+                ev.getX() - downEvent.getX();
         float offsetX = pdfView.getCurrentXOffset() - delta * pdfView.getZoom();
         float offsetY = pdfView.getCurrentYOffset() - delta * pdfView.getZoom();
         int startingPage = pdfView.findFocusPage(offsetX, offsetY);
@@ -242,8 +241,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
         }
 
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
-                (int) minX, 0, (int) minY, 0);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, 0, (int) minY,
+                0);
         return true;
     }
 
@@ -268,8 +267,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             maxY = 0;
         }
 
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
-                (int) minX, (int) maxX, (int) minY, (int) maxY);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, (int) maxX,
+                (int) minY, (int) maxY);
     }
 
     @Override
@@ -335,16 +334,12 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         ViewParent viewToDisableTouch = getViewToDisableTouch(view);
         boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
         boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
-        if (viewToDisableTouch != null &&
-                (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_MOVE:
-                    viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-                    break;
+        if (viewToDisableTouch != null && (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
+            int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+                viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
+            } else if (action == MotionEvent.ACTION_UP) {
+                viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
             }
         }
     }
