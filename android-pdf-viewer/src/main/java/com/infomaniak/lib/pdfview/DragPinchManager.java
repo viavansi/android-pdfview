@@ -38,10 +38,8 @@ import com.shockwave.pdfium.util.SizeF;
  * This Manager takes care of moving the PDFView,
  * set its zoom track user actions.
  */
-class DragPinchManager implements GestureDetector.OnGestureListener,
-        GestureDetector.OnDoubleTapListener,
-        ScaleGestureDetector.OnScaleGestureListener,
-        View.OnTouchListener {
+class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener,
+        ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 
     private PDFView pdfView;
     private AnimationManager animationManager;
@@ -107,8 +105,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         }
         float mappedX = -pdfView.getCurrentXOffset() + x;
         float mappedY = -pdfView.getCurrentYOffset() + y;
-        int page = pdfFile.getPageAtOffset(pdfView.isSwipeVertical() ? mappedY : mappedX,
-                pdfView.getZoom());
+        int page = pdfFile.getPageAtOffset(pdfView.isSwipeVertical() ? mappedY : mappedX, pdfView.getZoom());
         SizeF pageSize = pdfFile.getScaledPageSize(page, pdfView.getZoom());
         int pageX, pageY;
         if (pdfView.isSwipeVertical()) {
@@ -119,12 +116,11 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             pageX = (int) pdfFile.getPageOffset(page, pdfView.getZoom());
         }
         for (PdfDocument.Link link : pdfFile.getPageLinks(page)) {
-            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(),
-                    (int) pageSize.getHeight(), link.getBounds());
+            RectF mapped = pdfFile.mapRectToDevice(page, pageX, pageY, (int) pageSize.getWidth(), (int) pageSize.getHeight(),
+                    link.getBounds());
             mapped.sort();
             if (mapped.contains(mappedX, mappedY)) {
-                pdfView.callbacks.callLinkHandler(new LinkTapEvent(x, y, mappedX, mappedY, mapped
-                        , link));
+                pdfView.callbacks.callLinkHandler(new LinkTapEvent(x, y, mappedX, mappedY, mapped, link));
                 return true;
             }
         }
@@ -149,8 +145,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         float offsetX = pdfView.getCurrentXOffset() - delta * pdfView.getZoom();
         float offsetY = pdfView.getCurrentYOffset() - delta * pdfView.getZoom();
         int startingPage = pdfView.findFocusPage(offsetX, offsetY);
-        int targetPage = Math.max(0, Math.min(pdfView.getPageCount() - 1,
-                startingPage + direction));
+        int targetPage = Math.max(0, Math.min(pdfView.getPageCount() - 1, startingPage + direction));
 
         SnapEdge edge = pdfView.findSnapEdge(targetPage);
         float offset = pdfView.snapOffsetForPage(targetPage, edge);
@@ -246,8 +241,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             minY = -(pdfView.toCurrentScale(pdfFile.getMaxPageHeight()) - pdfView.getHeight());
         }
 
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
-                (int) minX, 0, (int) minY, 0);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, 0, (int) minY,
+                0);
         return true;
     }
 
@@ -258,8 +253,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         PdfFile pdfFile = pdfView.pdfFile;
 
         float pageStart = -pdfFile.getPageOffset(pdfView.getCurrentPage(), pdfView.getZoom());
-        float pageEnd = pageStart - pdfFile.getPageLength(pdfView.getCurrentPage(),
-                pdfView.getZoom());
+        float pageEnd = pageStart - pdfFile.getPageLength(pdfView.getCurrentPage(), pdfView.getZoom());
         float minX, minY, maxX, maxY;
         if (pdfView.isSwipeVertical()) {
             minX = -(pdfView.toCurrentScale(pdfFile.getMaxPageWidth()) - pdfView.getWidth());
@@ -273,8 +267,8 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
             maxY = 0;
         }
 
-        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY),
-                (int) minX, (int) maxX, (int) minY, (int) maxY);
+        animationManager.startFlingAnimation(xOffset, yOffset, (int) (velocityX), (int) (velocityY), (int) minX, (int) maxX,
+                (int) minY, (int) maxY);
     }
 
     @Override
@@ -338,11 +332,9 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
 
     private void handleTouchPriority(MotionEvent event, View view) {
         ViewParent viewToDisableTouch = getViewToDisableTouch(view);
-        boolean canScrollHorizontally =
-                view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
+        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
         boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
-        if (viewToDisableTouch != null &&
-                (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
+        if (viewToDisableTouch != null && (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
             int action = event.getAction();
             if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
                 viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
