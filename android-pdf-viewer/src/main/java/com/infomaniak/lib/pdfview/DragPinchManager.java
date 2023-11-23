@@ -343,11 +343,11 @@ class DragPinchManager implements GestureDetector.OnGestureListener,
         boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
         if (viewToDisableTouch != null &&
                 (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE ->
-                        viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
-                case MotionEvent.ACTION_UP ->
-                        viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
+            int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+                viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
+            } else if (action == MotionEvent.ACTION_UP) {
+                viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
             }
         }
     }
