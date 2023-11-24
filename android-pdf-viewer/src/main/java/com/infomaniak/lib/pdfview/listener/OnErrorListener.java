@@ -15,8 +15,6 @@
  */
 package com.infomaniak.lib.pdfview.listener;
 
-import android.net.Uri;
-
 public interface OnErrorListener {
 
     /**
