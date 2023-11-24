@@ -787,8 +787,7 @@ public class PDFView extends RelativeLayout {
         recycle();
         invalidate();
         if (onErrorListener != null) {
-            Uri uri = docSource instanceof UriSource ? ((UriSource) docSource).getUri() : null;
-            onErrorListener.onError(t, uri);
+            onErrorListener.onError(t);
         } else {
             Log.e("PDFView", "load pdf error", t);
         }
