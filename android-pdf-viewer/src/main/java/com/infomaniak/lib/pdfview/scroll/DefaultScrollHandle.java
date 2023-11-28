@@ -1,5 +1,7 @@
 package com.infomaniak.lib.pdfview.scroll;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -7,23 +9,22 @@ import android.os.Handler;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.infomaniak.lib.pdfview.PDFView;
 import com.infomaniak.lib.pdfview.R;
+import com.infomaniak.lib.pdfview.util.TouchUtils;
 import com.infomaniak.lib.pdfview.util.Util;
 
 public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle {
 
-    private final static int HANDLE_WIDTH = 65;
-    private final static int HANDLE_HEIGHT = 40;
-    private final static int DEFAULT_TEXT_SIZE = 12;
+    private static final int HANDLE_WIDTH = 65;
+    private static final int HANDLE_HEIGHT = 40;
+    private static final int DEFAULT_TEXT_SIZE = 12;
+    private static final int NO_ALIGN = -1;
 
     private final Handler handler = new Handler();
     private final boolean inverted;
@@ -63,20 +64,12 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     public void setupLayout(PDFView pdfView) {
         // determine handler position, default is right (when scrolling vertically) or bottom (when scrolling horizontally)
         if (pdfView.isSwipeVertical()) {
-            if (inverted) { // left
-                handleAlign = ALIGN_PARENT_LEFT;
-            } else { // right
-                handleAlign = ALIGN_PARENT_RIGHT;
-            }
+            handleAlign = inverted ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT;
         } else {
             int tempWidth = handleWidth;
             handleWidth = handleHeight;
             handleHeight = tempWidth;
-            if (inverted) { // top
-                handleAlign = ALIGN_PARENT_TOP;
-            } else { // bottom
-                handleAlign = ALIGN_PARENT_BOTTOM;
-            }
+            handleAlign = inverted ? ALIGN_PARENT_TOP : ALIGN_PARENT_BOTTOM;
         }
 
         setHandleView();
@@ -86,62 +79,28 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private void setHandleView() {
         if (handleBackgroundDrawable != null) {
-            setBackground(handleBackgroundDrawable);
+            setBackgroundAndLayoutParams(handleBackgroundDrawable, false);
         } else if (handleView != null) {
-            initWithCustomView();
+            initViewWithCustomView();
         } else {
             initDefaultView();
         }
     }
 
-    private ViewParent getViewToDisableTouch(View startingView) {
-        ViewParent parentView = startingView.getParent();
-        while (parentView != null && !(parentView instanceof RecyclerView)) {
-            parentView = parentView.getParent();
-        }
-        return parentView;
-    }
-
-    private void handleTouchPriority(MotionEvent event, View view) {
-        ViewParent viewToDisableTouch = getViewToDisableTouch(view);
-        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
-        boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
-        if (viewToDisableTouch != null && (event.getPointerCount() >= 1 || canScrollHorizontally || canScrollVertically)) {
-            int action = event.getAction();
-            if (action == MotionEvent.ACTION_MOVE) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
-            } else if (action == MotionEvent.ACTION_UP) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-            }
-        }
-    }
-
     private void initDefaultView() {
-        int handleBackground;
-        handleBackground = switch (handleAlign) {
-            case ALIGN_PARENT_LEFT -> R.drawable.default_scroll_handle_left;
-            case ALIGN_PARENT_RIGHT -> R.drawable.default_scroll_handle_right;
-            case ALIGN_PARENT_TOP -> R.drawable.default_scroll_handle_top;
-            default -> R.drawable.default_scroll_handle_bottom;
-        };
-
-        setBackground(getDrawable(handleBackground));
-
-        LayoutParams rootLayoutParams = new LayoutParams(Util.getDP(context, handleWidth), Util.getDP(context,
-                handleHeight));
-        rootLayoutParams.addRule(handleAlign);
-        setLayoutParams(rootLayoutParams);
-
-        LayoutParams textviewLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        int handleBackground = getHandleBackgroundResource();
+        Drawable backgroundDrawable = getDrawable(handleBackground);
+        setBackgroundAndLayoutParams(backgroundDrawable, false);
+        setRootLayoutParams(false);
+        LayoutParams textviewLayoutParams = getLayoutParams(WRAP_CONTENT, WRAP_CONTENT, NO_ALIGN);
         textviewLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         addView(textView, textviewLayoutParams);
     }
 
-    private void initWithCustomView() {
+    private void initViewWithCustomView() {
         textView = handleView.findViewWithTag("pageIndicator");
 
-        LayoutParams lp = new LayoutParams(Util.getDP(context, handleWidth), Util.getDP(context, handleHeight));
+        LayoutParams lp = getLayoutParams(Util.getDP(context, handleWidth), Util.getDP(context, handleHeight), NO_ALIGN);
         lp.setMargins(
                 Util.getDP(context, handlePaddingLeft),
                 Util.getDP(context, handlePaddingTop),
@@ -150,9 +109,40 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         );
         addView(handleView, lp);
 
-        LayoutParams rootLayoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        rootLayoutParams.addRule(handleAlign);
-        setLayoutParams(rootLayoutParams);
+        setRootLayoutParams(true);
+    }
+
+    private void setBackgroundAndLayoutParams(Drawable backgroundDrawable, boolean isCustomView) {
+        setBackground(backgroundDrawable);
+        setRootLayoutParams(isCustomView);
+    }
+
+    private int getHandleBackgroundResource() {
+        return switch (handleAlign) {
+            case ALIGN_PARENT_LEFT -> R.drawable.default_scroll_handle_left;
+            case ALIGN_PARENT_RIGHT -> R.drawable.default_scroll_handle_right;
+            case ALIGN_PARENT_TOP -> R.drawable.default_scroll_handle_top;
+            default -> R.drawable.default_scroll_handle_bottom;
+        };
+    }
+
+    private LayoutParams getLayoutParams(int width, int height, int align) {
+        LayoutParams layoutParams = new LayoutParams(width, height);
+        if (align != NO_ALIGN) layoutParams.addRule(align);
+        return layoutParams;
+    }
+
+    private void setRootLayoutParams(boolean isCustomView) {
+        int width;
+        int height;
+        if (isCustomView) {
+            width = WRAP_CONTENT;
+            height = WRAP_CONTENT;
+        } else {
+            width = Util.getDP(context, handleWidth);
+            height = Util.getDP(context, handleHeight);
+        }
+        setLayoutParams(getLayoutParams(width, height, handleAlign));
     }
 
     private Drawable getDrawable(int resDrawable) {
@@ -213,7 +203,9 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private void calculateMiddle() {
-        float pos, viewSize, pdfViewSize;
+        float pos;
+        float viewSize;
+        float pdfViewSize;
         if (pdfView.isSwipeVertical()) {
             pos = getY();
             viewSize = getHeight();
@@ -278,6 +270,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     /**
      * Use a custom view as the handle. Note that this view should have a TextView with a specific tag,
      * "pageIndicator", in order to display the current page
+     *
      * @param handleView view to set as the handle
      */
     public void setPageHandleView(View handleView) {
@@ -285,7 +278,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     /**
-     * @param handleWidth width of the handle
+     * @param handleWidth  width of the handle
      * @param handleHeight width of the handle
      */
     public void setHandleSize(int handleWidth, int handleHeight) {
@@ -294,12 +287,12 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     /**
-     * @param paddingLeft left padding of the handle
-     * @param paddingTop top padding of the handle
-     * @param paddingRight right padding of the handle
+     * @param paddingLeft   left padding of the handle
+     * @param paddingTop    top padding of the handle
+     * @param paddingRight  right padding of the handle
      * @param paddingBottom bottom padding of the handle
      */
-    public void setHandlePaddings(int paddingLeft, int paddingTop,  int paddingRight, int paddingBottom) {
+    public void setHandlePaddings(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
         handlePaddingLeft = paddingLeft;
         handlePaddingTop = paddingTop;
         handlePaddingRight = paddingRight;
@@ -323,10 +316,9 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             return super.onTouchEvent(event);
         }
 
-        handleTouchPriority(event, this);
+        TouchUtils.handleTouchPriority(event, this, 1);
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 pdfView.stopFling();
                 handler.removeCallbacks(hidePageScrollerRunnable);
                 if (pdfView.isSwipeVertical()) {
@@ -334,21 +326,26 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
                 } else {
                     currentPos = event.getRawX() - getX();
                 }
-            case MotionEvent.ACTION_MOVE:
+                return true;
+            }
+            case MotionEvent.ACTION_MOVE -> {
                 if (pdfView.isSwipeVertical()) {
                     setPosition(event.getRawY() - currentPos + relativeHandlerMiddle);
-                    pdfView.setPositionOffset(relativeHandlerMiddle / (float) getHeight(), false);
+                    pdfView.setPositionOffset(relativeHandlerMiddle / getHeight(), false);
                 } else {
                     setPosition(event.getRawX() - currentPos + relativeHandlerMiddle);
-                    pdfView.setPositionOffset(relativeHandlerMiddle / (float) getWidth(), false);
+                    pdfView.setPositionOffset(relativeHandlerMiddle / getWidth(), false);
                 }
                 return true;
-            case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP:
+            }
+            case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 hideDelayed();
                 pdfView.performPageSnap();
                 return true;
+            }
+            default -> {
+                return super.onTouchEvent(event);
+            }
         }
-
-        return super.onTouchEvent(event);
     }
 }
