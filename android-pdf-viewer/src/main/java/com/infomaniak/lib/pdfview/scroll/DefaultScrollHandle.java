@@ -107,6 +107,9 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
                 Util.getDP(context, handlePaddingRight),
                 Util.getDP(context, handlePaddingBottom)
         );
+        if (handleView.getParent() != null) {
+            removeView(handleView);
+        }
         addView(handleView, lp);
 
         setRootLayoutParams(true);
