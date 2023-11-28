@@ -8,6 +8,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TouchUtils {
 
+    private TouchUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static void handleTouchPriority(MotionEvent event, View view, int pointerCount) {
         ViewParent viewToDisableTouch = getViewToDisableTouch(view);
         boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
