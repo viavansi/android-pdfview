@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,7 +27,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     private static final int DEFAULT_TEXT_SIZE = 12;
     private static final int NO_ALIGN = -1;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final boolean inverted;
     private final Runnable hidePageScrollerRunnable = this::hide;
     protected TextView textView;
@@ -79,7 +80,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private void setHandleView() {
         if (handleBackgroundDrawable != null) {
-            setBackgroundAndLayoutParams(handleBackgroundDrawable, false);
+            initDrawableView(handleBackgroundDrawable);
         } else if (handleView != null) {
             initViewWithCustomView();
         } else {
@@ -87,10 +88,15 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         }
     }
 
+    private void initDrawableView(Drawable drawable) {
+        setBackground(drawable);
+        setRootLayoutParams(false);
+    }
+
     private void initDefaultView() {
         int handleBackground = getHandleBackgroundResource();
         Drawable backgroundDrawable = getDrawable(handleBackground);
-        setBackgroundAndLayoutParams(backgroundDrawable, false);
+        setBackground(backgroundDrawable);
         setRootLayoutParams(false);
         LayoutParams textviewLayoutParams = getLayoutParams(WRAP_CONTENT, WRAP_CONTENT, NO_ALIGN);
         textviewLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
@@ -113,11 +119,6 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         addView(handleView, lp);
 
         setRootLayoutParams(true);
-    }
-
-    private void setBackgroundAndLayoutParams(Drawable backgroundDrawable, boolean isCustomView) {
-        setBackground(backgroundDrawable);
-        setRootLayoutParams(isCustomView);
     }
 
     private int getHandleBackgroundResource() {
