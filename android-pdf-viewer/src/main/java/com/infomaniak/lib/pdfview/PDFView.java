@@ -780,7 +780,7 @@ public class PDFView extends RelativeLayout {
         jumpTo(defaultPage, false);
     }
 
-    void loadError(Throwable t, DocumentSource docSource) {
+    void loadError(Throwable t) {
         state = State.ERROR;
         // store reference, because callbacks will be cleared in recycle() method
         OnErrorListener onErrorListener = callbacks.getOnError();
