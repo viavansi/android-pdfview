@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
@@ -108,6 +109,8 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     private fun getScrollHandle(): ScrollHandle {
         return DefaultScrollHandle(this).apply {
             setPageHandleView(layoutInflater.inflate(R.layout.handle_background, null))
+            setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
+            setTextSize(15)
             setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
             setHandlePaddings(0, HANDLE_PADDING_TOP_DP, 0, HANDLE_PADDING_BOTTOM_DP)
         }

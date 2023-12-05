@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -47,6 +48,10 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private int hideHandleDelayMillis = 1000;
 
+    private boolean isTouched = false;
+    private int textColorResId = -1;
+    private int textSize = DEFAULT_TEXT_SIZE;
+
     public DefaultScrollHandle(Context context) {
         this(context, false);
     }
@@ -55,10 +60,6 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         super(context);
         this.context = context;
         this.inverted = inverted;
-        textView = new TextView(context);
-        setVisibility(INVISIBLE);
-        setTextColor(Color.BLACK);
-        setTextSize(DEFAULT_TEXT_SIZE);
     }
 
     @Override
@@ -67,10 +68,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         if (pdfView.isSwipeVertical()) {
             handleAlign = inverted ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT;
         } else {
-            int tempWidth = handleWidth;
-            handleWidth = handleHeight;
-            handleHeight = tempWidth;
-            handleAlign = inverted ? ALIGN_PARENT_TOP : ALIGN_PARENT_BOTTOM;
+            setHandleRelativePosition();
         }
 
         setHandleView();
@@ -78,61 +76,83 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         this.pdfView = pdfView;
     }
 
+    private void setHandleRelativePosition() {
+        int tempWidth = handleWidth;
+        handleWidth = handleHeight;
+        handleHeight = tempWidth;
+        handleAlign = inverted ? ALIGN_PARENT_TOP : ALIGN_PARENT_BOTTOM;
+    }
+
     private void setHandleView() {
         if (handleBackgroundDrawable != null) {
-            initDrawableView(handleBackgroundDrawable);
+            initDefaultView(handleBackgroundDrawable);
         } else if (handleView != null) {
             initViewWithCustomView();
         } else {
-            initDefaultView();
+            initDefaultView(null);
         }
+
+        setVisibility(INVISIBLE);
+        textView.setTextColor(textColorResId);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
     }
 
-    private void initDrawableView(Drawable drawable) {
+    private void initBackgroundDrawable(Drawable drawable) {
         setBackground(drawable);
         setRootLayoutParams(false);
     }
 
-    private void initDefaultView() {
-        int handleBackground = getHandleBackgroundResource();
-        Drawable backgroundDrawable = getDrawable(handleBackground);
-        setBackground(backgroundDrawable);
-        setRootLayoutParams(false);
-        LayoutParams textviewLayoutParams = getLayoutParams(WRAP_CONTENT, WRAP_CONTENT, NO_ALIGN);
-        textviewLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-        addView(textView, textviewLayoutParams);
+    private void initDefaultView(Drawable drawable) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View view = layoutInflater.inflate(R.layout.default_handle, null);
+        TextView pageIndicator = view.findViewWithTag("pageIndicator");
+        textView = pageIndicator;
+        pageIndicator.setBackground(drawable != null ? drawable : getDefaultHandleBackgroundDrawable());
+        addView(view, getCustomViewLayoutParams());
+        setRootLayoutParams(true);
+    }
+
+    private LayoutParams getCustomViewLayoutParams() {
+        return getLayoutParams(
+                Util.getDP(context, handleWidth),
+                Util.getDP(context, handleHeight),
+                NO_ALIGN,
+                true
+        );
     }
 
     private void initViewWithCustomView() {
         textView = handleView.findViewWithTag("pageIndicator");
-
-        LayoutParams lp = getLayoutParams(Util.getDP(context, handleWidth), Util.getDP(context, handleHeight), NO_ALIGN);
-        lp.setMargins(
-                Util.getDP(context, handlePaddingLeft),
-                Util.getDP(context, handlePaddingTop),
-                Util.getDP(context, handlePaddingRight),
-                Util.getDP(context, handlePaddingBottom)
-        );
         if (handleView.getParent() != null) {
             removeView(handleView);
         }
-        addView(handleView, lp);
-
+        addView(handleView, getCustomViewLayoutParams());
         setRootLayoutParams(true);
     }
 
-    private int getHandleBackgroundResource() {
-        return switch (handleAlign) {
+    private Drawable getDefaultHandleBackgroundDrawable() {
+        int drawableResId = switch (handleAlign) {
             case ALIGN_PARENT_LEFT -> R.drawable.default_scroll_handle_left;
             case ALIGN_PARENT_RIGHT -> R.drawable.default_scroll_handle_right;
             case ALIGN_PARENT_TOP -> R.drawable.default_scroll_handle_top;
             default -> R.drawable.default_scroll_handle_bottom;
         };
+        return getDrawable(drawableResId);
     }
 
-    private LayoutParams getLayoutParams(int width, int height, int align) {
+    private LayoutParams getLayoutParams(int width, int height, int align, boolean withPadding) {
         LayoutParams layoutParams = new LayoutParams(width, height);
         if (align != NO_ALIGN) layoutParams.addRule(align);
+
+        if (withPadding) {
+            layoutParams.setMargins(
+                    Util.getDP(context, handlePaddingLeft),
+                    Util.getDP(context, handlePaddingTop),
+                    Util.getDP(context, handlePaddingRight),
+                    Util.getDP(context, handlePaddingBottom)
+            );
+        }
+
         return layoutParams;
     }
 
@@ -142,11 +162,12 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         if (isCustomView) {
             width = WRAP_CONTENT;
             height = WRAP_CONTENT;
+            setLayoutParams(getLayoutParams(width, height, handleAlign, false));
         } else {
             width = Util.getDP(context, handleWidth);
             height = Util.getDP(context, handleHeight);
+            setLayoutParams(getLayoutParams(width, height, handleAlign, true));
         }
-        setLayoutParams(getLayoutParams(width, height, handleAlign));
     }
 
     private Drawable getDrawable(int resDrawable) {
@@ -175,17 +196,20 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             return;
         }
         float pdfViewSize;
+        int handleSize;
         if (pdfView.isSwipeVertical()) {
             pdfViewSize = pdfView.getHeight();
+            handleSize = handleHeight;
         } else {
             pdfViewSize = pdfView.getWidth();
+            handleSize = handleWidth;
         }
         pos -= relativeHandlerMiddle;
 
         if (pos < 0) {
             pos = 0;
-        } else if (pos > pdfViewSize - Util.getDP(context, handleHeight) - Util.getDP(context, getPaddings())) {
-            pos = pdfViewSize - Util.getDP(context, handleHeight) - Util.getDP(context, getPaddings());
+        } else if (pos > pdfViewSize - Util.getDP(context, handleSize)) {
+            pos = pdfViewSize - Util.getDP(context, handleSize);
         }
 
         if (pdfView.isSwipeVertical()) {
@@ -254,14 +278,14 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
      * @param color color of the text handle
      */
     public void setTextColor(int color) {
-        textView.setTextColor(color);
+        textColorResId = color;
     }
 
     /**
      * @param size text size in dp
      */
     public void setTextSize(int size) {
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, size);
+        textSize = size;
     }
 
     /**
@@ -314,11 +338,36 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         return pdfView != null && pdfView.getPageCount() > 0 && !pdfView.documentFitsView();
     }
 
+    private View getTouchedView(MotionEvent event) {
+        int x = Math.round(event.getX());
+        int y = Math.round(event.getY());
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (x > child.getLeft() && x < child.getRight() && y > child.getTop() && y < child.getBottom()) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private boolean shouldIgnoreTouch(MotionEvent event) {
+        View touchedView = getTouchedView(event);
+        if (isTouched) {
+            return false;
+        } else if (touchedView != null) {
+            Object tag = touchedView.getTag();
+            return tag != null && !tag.toString().equals("rootHandle");
+        }
+        return true;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!isPDFViewReady()) {
+        if (!isPDFViewReady() || shouldIgnoreTouch(event)) {
             return super.onTouchEvent(event);
         }
+
+        isTouched = true;
 
         TouchUtils.handleTouchPriority(event, this, 1);
         switch (event.getAction()) {
@@ -345,6 +394,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 hideDelayed();
                 pdfView.performPageSnap();
+                isTouched = false;
                 return true;
             }
             default -> {

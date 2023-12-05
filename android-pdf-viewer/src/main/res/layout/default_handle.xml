@@ -7,9 +7,10 @@
     android:tag="rootHandle">
 
     <TextView
+        android:id="@+id/pageIndicator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/primary"
+        android:background="@android:color/black"
         android:gravity="center"
         android:tag="pageIndicator"
         android:textColor="@android:color/white"
