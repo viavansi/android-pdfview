@@ -97,11 +97,6 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
     }
 
-    private void initBackgroundDrawable(Drawable drawable) {
-        setBackground(drawable);
-        setRootLayoutParams(false);
-    }
-
     private void initDefaultView(Drawable drawable) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.default_handle, null);
@@ -109,7 +104,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         textView = pageIndicator;
         pageIndicator.setBackground(drawable != null ? drawable : getDefaultHandleBackgroundDrawable());
         addView(view, getCustomViewLayoutParams());
-        setRootLayoutParams(true);
+        setRootLayoutParams();
     }
 
     private LayoutParams getCustomViewLayoutParams() {
@@ -127,7 +122,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             removeView(handleView);
         }
         addView(handleView, getCustomViewLayoutParams());
-        setRootLayoutParams(true);
+        setRootLayoutParams();
     }
 
     private Drawable getDefaultHandleBackgroundDrawable() {
@@ -156,18 +151,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         return layoutParams;
     }
 
-    private void setRootLayoutParams(boolean isCustomView) {
-        int width;
-        int height;
-        if (isCustomView) {
-            width = WRAP_CONTENT;
-            height = WRAP_CONTENT;
-            setLayoutParams(getLayoutParams(width, height, handleAlign, false));
-        } else {
-            width = Util.getDP(context, handleWidth);
-            height = Util.getDP(context, handleHeight);
-            setLayoutParams(getLayoutParams(width, height, handleAlign, true));
-        }
+    private void setRootLayoutParams() {
+        setLayoutParams(getLayoutParams(WRAP_CONTENT, WRAP_CONTENT, handleAlign, false));
     }
 
     private Drawable getDrawable(int resDrawable) {
@@ -206,10 +191,11 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         }
         pos -= relativeHandlerMiddle;
 
+        float maxBound = pdfViewSize - Util.getDP(context, handleSize) - getPaddings();
         if (pos < 0) {
             pos = 0;
-        } else if (pos > pdfViewSize - Util.getDP(context, handleSize)) {
-            pos = pdfViewSize - Util.getDP(context, handleSize);
+        } else if (pos > maxBound) {
+            pos = maxBound;
         }
 
         if (pdfView.isSwipeVertical()) {
@@ -223,11 +209,12 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private int getPaddings() {
-        return switch (handleAlign) {
+        int paddings = switch (handleAlign) {
             case ALIGN_PARENT_LEFT, ALIGN_PARENT_RIGHT -> handlePaddingTop + handlePaddingBottom;
             case ALIGN_PARENT_TOP, ALIGN_PARENT_BOTTOM -> handlePaddingLeft + handlePaddingRight;
             default -> 0;
         };
+        return Util.getDP(context, paddings);
     }
 
     private void calculateMiddle() {
