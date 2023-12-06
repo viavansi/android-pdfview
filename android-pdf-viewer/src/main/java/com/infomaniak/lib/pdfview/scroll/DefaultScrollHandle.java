@@ -84,13 +84,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private void setHandleView() {
-        if (handleBackgroundDrawable != null) {
-            initDefaultView(handleBackgroundDrawable);
-        } else if (handleView != null) {
-            initViewWithCustomView();
-        } else {
-            initDefaultView(null);
-        }
+        if (handleView != null) initViewWithCustomView(); else initDefaultView(handleBackgroundDrawable);
 
         setVisibility(INVISIBLE);
         textView.setTextColor(textColorResId);
