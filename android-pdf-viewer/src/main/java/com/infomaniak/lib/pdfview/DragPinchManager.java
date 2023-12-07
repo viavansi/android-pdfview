@@ -24,13 +24,11 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewParent;
-
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.infomaniak.lib.pdfview.model.LinkTapEvent;
 import com.infomaniak.lib.pdfview.scroll.ScrollHandle;
 import com.infomaniak.lib.pdfview.util.SnapEdge;
+import com.infomaniak.lib.pdfview.util.TouchUtils;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.util.SizeF;
 
@@ -316,32 +314,10 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         }
 
         if (hasTouchPriority) {
-            handleTouchPriority(event, v);
+            TouchUtils.handleTouchPriority(event, v, 2);
         }
 
         return retVal;
-    }
-
-    private ViewParent getViewToDisableTouch(View startingView) {
-        ViewParent parentView = startingView.getParent();
-        while (parentView != null && !(parentView instanceof RecyclerView)) {
-            parentView = parentView.getParent();
-        }
-        return parentView;
-    }
-
-    private void handleTouchPriority(MotionEvent event, View view) {
-        ViewParent viewToDisableTouch = getViewToDisableTouch(view);
-        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
-        boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
-        if (viewToDisableTouch != null && (event.getPointerCount() >= 2 || canScrollHorizontally || canScrollVertically)) {
-            int action = event.getAction();
-            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
-            } else if (action == MotionEvent.ACTION_UP) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-            }
-        }
     }
 
     private void hideHandle() {

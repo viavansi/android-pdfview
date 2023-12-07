@@ -293,13 +293,13 @@ public class PDFView extends RelativeLayout {
             if (withAnimation) {
                 animationManager.startYAnimation(currentYOffset, offset);
             } else {
-                moveTo(currentXOffset, offset);
+                moveTo(currentXOffset, offset, false);
             }
         } else {
             if (withAnimation) {
                 animationManager.startXAnimation(currentXOffset, offset);
             } else {
-                moveTo(offset, currentYOffset);
+                moveTo(offset, currentYOffset, false);
             }
         }
         showPage(page);
@@ -780,7 +780,7 @@ public class PDFView extends RelativeLayout {
         jumpTo(defaultPage, false);
     }
 
-    void loadError(Throwable t, DocumentSource docSource) {
+    void loadError(Throwable t) {
         state = State.ERROR;
         // store reference, because callbacks will be cleared in recycle() method
         OnErrorListener onErrorListener = callbacks.getOnError();

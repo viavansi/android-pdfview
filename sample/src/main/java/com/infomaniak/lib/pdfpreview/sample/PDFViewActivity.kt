@@ -1,5 +1,6 @@
 package com.infomaniak.lib.pdfpreview.sample
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -7,12 +8,14 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
@@ -20,6 +23,7 @@ import com.infomaniak.lib.pdfview.listener.OnPageErrorListener
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
+import com.infomaniak.lib.pdfview.scroll.ScrollHandle
 import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
@@ -29,9 +33,15 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
 
     companion object {
         private val TAG: String = PDFViewActivity::class.java.simpleName
-        const val PERMISSION_CODE = 42042
-        const val SAMPLE_FILE = "sample.pdf"
-        const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+        private const val PERMISSION_CODE = 42042
+        private const val SAMPLE_FILE = "sample.pdf"
+        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+        private const val HANDLE_WIDTH_DP = 65
+        private const val HANDLE_HEIGHT_DP = 40
+        private const val HANDLE_PADDING_TOP_DP = 40
+        private const val HANDLE_PADDING_BOTTOM_DP = 40
+        private const val PDF_PAGE_SPACING_DP = 10
+        private const val DEFAULT_TEXT_SIZE_DP = 16
     }
 
     private var uri: Uri? = null
@@ -41,14 +51,17 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val viewModel: PDFViewViewModel by viewModels()
 
-    private val selectFileResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
-        if (activityResult.resultCode == RESULT_OK) {
-            activityResult.data?.let { intent ->
-                uri = intent.data
-                displayFromUri(uri)
+    private val pdfScrollHandle by lazy { getScrollHandle() }
+
+    private val selectFileResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            if (activityResult.resultCode == RESULT_OK) {
+                activityResult.data?.let { intent ->
+                    uri = intent.data
+                    displayFromUri(uri)
+                }
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,12 +74,12 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
 
     private fun pickFile() {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-            val permissionCheck = ContextCompat.checkSelfPermission(this,
-                READ_EXTERNAL_STORAGE)
+            val permissionCheck = ContextCompat.checkSelfPermission(
+                this, READ_EXTERNAL_STORAGE
+            )
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
-                    this, arrayOf(READ_EXTERNAL_STORAGE),
-                    PERMISSION_CODE
+                    this, arrayOf(READ_EXTERNAL_STORAGE), PERMISSION_CODE
                 )
                 return
             }
@@ -94,6 +107,18 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         title = pdfFileName
     }
 
+    @SuppressLint("InflateParams")
+    private fun getScrollHandle(): ScrollHandle {
+        return DefaultScrollHandle(this).apply {
+            val view = layoutInflater.inflate(R.layout.handle_background, null);
+            setPageHandleView(view, view.findViewById<TextView>(R.id.pageIndicator))
+            setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
+            setTextSize(DEFAULT_TEXT_SIZE_DP)
+            setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
+            setHandlePaddings(0, HANDLE_PADDING_TOP_DP, 0, HANDLE_PADDING_BOTTOM_DP)
+        }
+    }
+
     private fun displayFromAsset(password: String? = null) {
         pdfFileName = SAMPLE_FILE
         binding.pdfView.fromAsset(SAMPLE_FILE)
@@ -101,8 +126,8 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
             .onPageChange(this)
             .enableAnnotationRendering(true)
             .onLoad(this)
-            .scrollHandle(DefaultScrollHandle(this))
-            .spacing(10) // in dp
+            .scrollHandle(pdfScrollHandle)
+            .spacing(PDF_PAGE_SPACING_DP)
             .onPageError(this)
             .pageFitPolicy(FitPolicy.BOTH)
             .password(password)
@@ -116,17 +141,27 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
             .onPageChange(this)
             .enableAnnotationRendering(true)
             .onLoad(this)
-            .scrollHandle(DefaultScrollHandle(this))
-            .spacing(10) // in dp
+            .scrollHandle(pdfScrollHandle)
+            .spacing(PDF_PAGE_SPACING_DP)
             .password(password)
             .onPageError(this)
             .onError(this)
             .load()
     }
 
-    override fun onPageChanged(page: Int, pageCount: Int) {
-        pageNumber = page
-        title = String.format("%s %s / %s", pdfFileName, page + 1, pageCount)
+    private fun openPasswordDialog() {
+        PasswordDialog(onPasswordEntered = { password ->
+            displayFromUri(uri, password)
+        }).also { it.show(supportFragmentManager, "TAG") }
+    }
+
+    private fun printBookmarksTree(bookmarks: List<PdfDocument.Bookmark>, sep: String) {
+        for (bookmark in bookmarks) {
+            Log.e(TAG, String.format("%s %s, p %d", sep, bookmark.title, bookmark.pageIdx))
+            if (bookmark.hasChildren()) {
+                printBookmarksTree(bookmark.children, "$sep-")
+            }
+        }
     }
 
     override fun loadComplete(nbPages: Int) {
@@ -142,13 +177,9 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         printBookmarksTree(binding.pdfView.tableOfContents, "-")
     }
 
-    private fun printBookmarksTree(tree: List<PdfDocument.Bookmark>, sep: String) {
-        for (b in tree) {
-            Log.e(TAG, String.format("%s %s, p %d", sep, b.title, b.pageIdx))
-            if (b.hasChildren()) {
-                printBookmarksTree(b.children, "$sep-")
-            }
-        }
+    override fun onPageChanged(page: Int, pageCount: Int) {
+        pageNumber = page
+        title = String.format("%s %s / %s", pdfFileName, page + 1, pageCount)
     }
 
     /**
@@ -158,24 +189,21 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
      * @param permissions  Permissions that requested
      * @param grantResults Whether permissions granted
      */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                launchPicker()
-            }
+        if (requestCode == PERMISSION_CODE
+            && grantResults.isNotEmpty()
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            launchPicker()
         }
     }
 
     override fun onPageError(page: Int, t: Throwable) {
         Log.e(TAG, "Cannot load page $page")
-    }
-
-    private fun openPasswordDialog() {
-        PasswordDialog(onPasswordEntered = { password ->
-            displayFromUri(uri, password)
-        }).also { it.show(supportFragmentManager, "TAG") }
     }
 
     override fun onError(throwable: Throwable?) {
