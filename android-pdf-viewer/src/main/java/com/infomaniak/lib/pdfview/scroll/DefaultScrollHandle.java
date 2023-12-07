@@ -49,7 +49,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private boolean hasStartedDragging = false;
     private int textColorResId = -1;
-    private int textSize = DEFAULT_TEXT_SIZE;
+    private int textSize = -1;
 
     public DefaultScrollHandle(Context context) {
         this(context, false);
@@ -86,8 +86,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
         setVisibility(INVISIBLE);
         if (pageIndicator != null) {
-            pageIndicator.setTextColor(textColorResId);
-            pageIndicator.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+            if (textColorResId != -1) pageIndicator.setTextColor(textColorResId);
+            if (textSize != -1)pageIndicator.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
         }
     }
 
@@ -279,7 +279,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
      * provide the pageIndicator parameter.
      *
      * @param handleView view to set as the handle
-     * @param pageIndicator view to use as the page indicator
+     * @param pageIndicator TextView to use as the page indicator
      */
     public void setPageHandleView(View handleView, TextView pageIndicator) {
         this.handleView = handleView;
