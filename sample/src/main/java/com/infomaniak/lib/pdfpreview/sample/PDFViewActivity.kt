@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -109,7 +110,8 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     @SuppressLint("InflateParams")
     private fun getScrollHandle(): ScrollHandle {
         return DefaultScrollHandle(this).apply {
-            setPageHandleView(layoutInflater.inflate(R.layout.handle_background, null))
+            val view = layoutInflater.inflate(R.layout.handle_background, null);
+            setPageHandleView(view, null)
             setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
             setTextSize(DEFAULT_TEXT_SIZE_DP)
             setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
@@ -193,10 +195,10 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                launchPicker()
-            }
+        if (requestCode == PERMISSION_CODE
+            && grantResults.isNotEmpty()
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            launchPicker()
         }
     }
 

@@ -30,7 +30,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final boolean inverted;
     private final Runnable hidePageScrollerRunnable = this::hide;
-    protected TextView textView;
+    protected TextView pageIndicator;
     protected Context context;
     private float relativeHandlerMiddle = 0f;
     private PDFView pdfView;
@@ -47,7 +47,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private int hideHandleDelayMillis = 1000;
 
-    private boolean isTouched = false;
+    private boolean hasStartedDragging = false;
     private int textColorResId = -1;
     private int textSize = DEFAULT_TEXT_SIZE;
 
@@ -85,15 +85,16 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
         if (handleView != null) initViewWithCustomView(); else initDefaultView(handleBackgroundDrawable);
 
         setVisibility(INVISIBLE);
-        textView.setTextColor(textColorResId);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+        if (pageIndicator != null) {
+            pageIndicator.setTextColor(textColorResId);
+            pageIndicator.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+        }
     }
 
     private void initDefaultView(Drawable drawable) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.default_handle, null);
-        TextView pageIndicator = view.findViewWithTag("pageIndicator");
-        textView = pageIndicator;
+        pageIndicator = view.findViewById(R.id.pageIndicator);
         pageIndicator.setBackground(drawable != null ? drawable : getDefaultHandleBackgroundDrawable());
         addView(view, getCustomViewLayoutParams());
         setRootLayoutParams();
@@ -109,7 +110,6 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private void initViewWithCustomView() {
-        textView = handleView.findViewWithTag("pageIndicator");
         if (handleView.getParent() != null) {
             removeView(handleView);
         }
@@ -233,8 +233,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     @Override
     public void setPageNum(int pageNum) {
         String text = String.valueOf(pageNum);
-        if (!textView.getText().equals(text)) {
-            textView.setText(text);
+        if (pageIndicator != null && !pageIndicator.getText().equals(text)) {
+            pageIndicator.setText(text);
         }
     }
 
@@ -275,13 +275,15 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     /**
-     * Use a custom view as the handle. Note that this view should have a TextView with a specific tag,
-     * "pageIndicator", in order to display the current page
+     * Use a custom view as the handle. if you want to have the page indicator,
+     * provide the pageIndicator parameter.
      *
      * @param handleView view to set as the handle
+     * @param pageIndicator view to use as the page indicator
      */
-    public void setPageHandleView(View handleView) {
+    public void setPageHandleView(View handleView, TextView pageIndicator) {
         this.handleView = handleView;
+        this.pageIndicator = pageIndicator;
     }
 
     /**
@@ -331,7 +333,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private boolean shouldIgnoreTouch(MotionEvent event) {
         View touchedView = getTouchedView(event);
-        if (isTouched) {
+        if (hasStartedDragging) {
             return false;
         } else if (touchedView != null) {
             Object tag = touchedView.getTag();
@@ -346,7 +348,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             return super.onTouchEvent(event);
         }
 
-        isTouched = true;
+        hasStartedDragging = true;
 
         TouchUtils.handleTouchPriority(event, this, 1);
         switch (event.getAction()) {
@@ -373,7 +375,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
             case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 hideDelayed();
                 pdfView.performPageSnap();
-                isTouched = false;
+                hasStartedDragging = false;
                 return true;
             }
             default -> {
