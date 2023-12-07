@@ -40,6 +40,7 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         private const val HANDLE_PADDING_TOP_DP = 40
         private const val HANDLE_PADDING_BOTTOM_DP = 40
         private const val PDF_PAGE_SPACING_DP = 10
+        private const val DEFAULT_TEXT_SIZE_DP = 16
     }
 
     private var uri: Uri? = null
@@ -110,7 +111,7 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         return DefaultScrollHandle(this).apply {
             setPageHandleView(layoutInflater.inflate(R.layout.handle_background, null))
             setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
-            setTextSize(15)
+            setTextSize(DEFAULT_TEXT_SIZE_DP)
             setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
             setHandlePaddings(0, HANDLE_PADDING_TOP_DP, 0, HANDLE_PADDING_BOTTOM_DP)
         }

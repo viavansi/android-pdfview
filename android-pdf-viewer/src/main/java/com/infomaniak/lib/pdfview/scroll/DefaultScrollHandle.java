@@ -3,7 +3,6 @@ package com.infomaniak.lib.pdfview.scroll;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -64,23 +63,22 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     @Override
     public void setupLayout(PDFView pdfView) {
-        // determine handler position, default is right (when scrolling vertically) or bottom (when scrolling horizontally)
-        if (pdfView.isSwipeVertical()) {
-            handleAlign = inverted ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT;
-        } else {
-            setHandleRelativePosition();
-        }
-
+        setHandleRelativePosition(pdfView);
         setHandleView();
         pdfView.addView(this);
         this.pdfView = pdfView;
     }
 
-    private void setHandleRelativePosition() {
-        int tempWidth = handleWidth;
-        handleWidth = handleHeight;
-        handleHeight = tempWidth;
-        handleAlign = inverted ? ALIGN_PARENT_TOP : ALIGN_PARENT_BOTTOM;
+    private void setHandleRelativePosition(PDFView pdfView) {
+        // determine handler position, default is right (when scrolling vertically) or bottom (when scrolling horizontally)
+        if (pdfView.isSwipeVertical()) {
+            handleAlign = inverted ? ALIGN_PARENT_LEFT : ALIGN_PARENT_RIGHT;
+        } else {
+            int tempWidth = handleWidth;
+            handleWidth = handleHeight;
+            handleHeight = tempWidth;
+            handleAlign = inverted ? ALIGN_PARENT_TOP : ALIGN_PARENT_BOTTOM;
+        }
     }
 
     private void setHandleView() {
