@@ -111,7 +111,7 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     private fun getScrollHandle(): ScrollHandle {
         return DefaultScrollHandle(this).apply {
             val view = layoutInflater.inflate(R.layout.handle_background, null);
-            setPageHandleView(view, null)
+            setPageHandleView(view, view.findViewById<TextView>(R.id.pageIndicator))
             setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
             setTextSize(DEFAULT_TEXT_SIZE_DP)
             setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
