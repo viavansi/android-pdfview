@@ -323,7 +323,13 @@ class DragPinchManager implements
         }
 
         if (hasTouchPriority) {
-            TouchUtils.handleTouchPriority(event, v, TOUCH_POINTER_COUNT, shouldOverrideTouchPriority(v, event));
+            TouchUtils.handleTouchPriority(
+                    event,
+                    v,
+                    TOUCH_POINTER_COUNT,
+                    shouldOverrideTouchPriority(v, event),
+                    pdfView.isZooming()
+            );
         }
 
         return retVal;

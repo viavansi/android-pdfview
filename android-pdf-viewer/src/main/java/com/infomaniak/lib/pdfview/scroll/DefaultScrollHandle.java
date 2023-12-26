@@ -350,7 +350,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
         hasStartedDragging = true;
 
-        TouchUtils.handleTouchPriority(event, this, TOUCH_POINTER_COUNT, false);
+        TouchUtils.handleTouchPriority(event, this, TOUCH_POINTER_COUNT, false, pdfView.isZooming());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 pdfView.stopFling();

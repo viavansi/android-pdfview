@@ -12,17 +12,27 @@ public class TouchUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static void handleTouchPriority(MotionEvent event, View view, int pointerCount, boolean shouldOverrideTouchPriority) {
+    public static void handleTouchPriority(MotionEvent event,
+                                           View view,
+                                           int pointerCount,
+                                           boolean shouldOverrideTouchPriority,
+                                           boolean isZooming) {
         ViewParent viewToDisableTouch = getViewToDisableTouch(view);
+
+        if (viewToDisableTouch == null) {
+            return;
+        }
+
         boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
         boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
         if (shouldOverrideTouchPriority) {
             viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-        } else if (viewToDisableTouch != null && (event.getPointerCount() >= pointerCount || canScrollHorizontally || canScrollVertically)) {
+        } else if (event.getPointerCount() >= pointerCount || canScrollHorizontally || canScrollVertically) {
             int action = event.getAction();
+
             if (action == MotionEvent.ACTION_UP) {
                 viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-            } else if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
+            } else if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE || isZooming) {
                 viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
             }
         }
