@@ -46,6 +46,7 @@ class DragPinchManager implements
 
     private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 150F;
     private static final float STARTING_TOUCH_POSITION_NOT_INITIALIZED = -1F;
+    private static final int TOUCH_POINTER_COUNT = 2;
 
     private final PDFView pdfView;
     private final AnimationManager animationManager;
@@ -322,7 +323,7 @@ class DragPinchManager implements
         }
 
         if (hasTouchPriority) {
-            TouchUtils.handleTouchPriority(event, v, 2, shouldOverrideTouchPriority(v, event));
+            TouchUtils.handleTouchPriority(event, v, TOUCH_POINTER_COUNT, shouldOverrideTouchPriority(v, event));
         }
 
         return retVal;
