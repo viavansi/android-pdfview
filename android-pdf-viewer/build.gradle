@@ -39,7 +39,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.findByName('release')
                 groupId = 'com.github.infomaniak'
-                artifactId = 'android-pdfview'
+                artifactId = 'android-pdf-viewer'
                 version = "${rootProject.tools.versionName}"
             }
         }
