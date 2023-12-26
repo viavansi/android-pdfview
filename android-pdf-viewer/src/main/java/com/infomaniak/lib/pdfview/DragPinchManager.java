@@ -146,7 +146,7 @@ class DragPinchManager implements
         } else {
             direction = velocityX > 0 ? -1 : 1;
         }
-        // get the focused page during the down event to ensure only a single page is changed
+        // Get the focused page during the down event to ensure only a single page is changed
         float delta = pdfView.isSwipeVertical() ? ev.getY() - downEvent.getY() :
                 ev.getX() - downEvent.getX();
         float offsetX = pdfView.getCurrentXOffset() - delta * pdfView.getZoom();
@@ -188,7 +188,7 @@ class DragPinchManager implements
 
     @Override
     public void onShowPress(@NonNull MotionEvent e) {
-        //Nothing to do here since we don't want to show anything when the user press the view
+        // Nothing to do here since we don't want to show anything when the user press the view
     }
 
     @Override
