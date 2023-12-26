@@ -44,7 +44,7 @@ class DragPinchManager implements
         ScaleGestureDetector.OnScaleGestureListener,
         View.OnTouchListener {
 
-    private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 250F;
+    private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 150F;
     private static final float STARTING_TOUCH_POSITION_NOT_INITIALIZED = -1F;
 
     private final PDFView pdfView;
