@@ -316,6 +316,10 @@ class DragPinchManager implements
         boolean retVal = scaleGestureDetector.onTouchEvent(event);
         retVal = gestureDetector.onTouchEvent(event) || retVal;
 
+        if (event.getAction() == MotionEvent.ACTION_MOVE && event.getPointerCount() >= 2) {
+            startingTouchPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+        }
+
         if (event.getAction() == MotionEvent.ACTION_UP && scrolling) {
             startingTouchPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
             scrolling = false;
