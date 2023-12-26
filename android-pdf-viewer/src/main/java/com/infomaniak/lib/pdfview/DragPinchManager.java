@@ -44,7 +44,7 @@ class DragPinchManager implements
         ScaleGestureDetector.OnScaleGestureListener,
         View.OnTouchListener {
 
-    private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 300F;
+    private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 250F;
     private static final float STARTING_TOUCH_POSITION_NOT_INITIALIZED = -1F;
 
     private final PDFView pdfView;
@@ -188,7 +188,7 @@ class DragPinchManager implements
 
     @Override
     public void onShowPress(@NonNull MotionEvent e) {
-
+        //Nothing to do here since we don't want to show anything when the user press the view
     }
 
     @Override
