@@ -277,6 +277,10 @@ public class PDFView extends RelativeLayout {
         decodingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    public boolean isShown() {
+        return state == State.SHOWN;
+    }
+
     /**
      * Go to the given page.
      *
