@@ -17,6 +17,8 @@ package com.infomaniak.lib.pdfview;
 
 import static com.infomaniak.lib.pdfview.util.Constants.Pinch.MAXIMUM_ZOOM;
 import static com.infomaniak.lib.pdfview.util.Constants.Pinch.MINIMUM_ZOOM;
+import static com.infomaniak.lib.pdfview.util.TouchUtils.DIRECTION_SCROLLING_LEFT;
+import static com.infomaniak.lib.pdfview.util.TouchUtils.DIRECTION_SCROLLING_RIGHT;
 
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -44,7 +46,8 @@ class DragPinchManager implements
         ScaleGestureDetector.OnScaleGestureListener,
         View.OnTouchListener {
 
-    private static final float MIN_TRIGGER_DELTA_TOUCH_PRIORITY = 150F;
+    private static final float MIN_TRIGGER_DELTA_X_TOUCH_PRIORITY = 150F;
+    private static final float MIN_TRIGGER_DELTA_Y_TOUCH_PRIORITY = 100F;
     private static final float STARTING_TOUCH_POSITION_NOT_INITIALIZED = -1F;
     private static final int TOUCH_POINTER_COUNT = 2;
 
@@ -58,7 +61,8 @@ class DragPinchManager implements
     private boolean scaling = false;
     private boolean enabled = false;
     private boolean hasTouchPriority = false;
-    private float startingTouchPosition = 0F;
+    private float startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+    private float startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
 
     DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
@@ -317,11 +321,13 @@ class DragPinchManager implements
         retVal = gestureDetector.onTouchEvent(event) || retVal;
 
         if (event.getAction() == MotionEvent.ACTION_MOVE && event.getPointerCount() >= 2) {
-            startingTouchPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
         }
 
         if (event.getAction() == MotionEvent.ACTION_UP && scrolling) {
-            startingTouchPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
             scrolling = false;
             onScrollEnd();
         }
@@ -341,18 +347,27 @@ class DragPinchManager implements
 
     private boolean shouldOverrideTouchPriority(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (!v.canScrollHorizontally(-1) || !v.canScrollHorizontally(1)) {
-                startingTouchPosition = event.getX();
+            if (!v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) || !v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT)) {
+                startingTouchXPosition = event.getX();
             } else {
-                startingTouchPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+                startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            }
+
+            startingTouchYPosition = event.getY();
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) && v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT)) {
+                startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
             }
         }
 
-        if (startingTouchPosition == STARTING_TOUCH_POSITION_NOT_INITIALIZED) {
+        if (startingTouchXPosition == STARTING_TOUCH_POSITION_NOT_INITIALIZED) {
             return false;
         } else {
-            float delta = Math.abs(event.getX() - startingTouchPosition);
-            return delta >= MIN_TRIGGER_DELTA_TOUCH_PRIORITY;
+            float deltaX = Math.abs(event.getX() - startingTouchXPosition);
+            float deltaY = Math.abs(event.getY() - startingTouchYPosition);
+            return deltaX >= MIN_TRIGGER_DELTA_X_TOUCH_PRIORITY && deltaY < MIN_TRIGGER_DELTA_Y_TOUCH_PRIORITY;
         }
     }
 

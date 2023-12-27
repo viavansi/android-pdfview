@@ -8,6 +8,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TouchUtils {
 
+    public static final int DIRECTION_SCROLLING_LEFT = -1;
+    public static final int DIRECTION_SCROLLING_RIGHT = 1;
+    static final int DIRECTION_SCROLLING_TOP = -1;
+    static final int DIRECTION_SCROLLING_BOTTOM = 1;
+
     private TouchUtils() {
         throw new IllegalStateException("Utility class");
     }
@@ -23,8 +28,10 @@ public class TouchUtils {
             return;
         }
 
-        boolean canScrollHorizontally = view.canScrollHorizontally(1) && view.canScrollHorizontally(-1);
-        boolean canScrollVertically = view.canScrollVertically(1) && view.canScrollVertically(-1);
+        boolean canScrollHorizontally =
+                view.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT) && view.canScrollHorizontally(DIRECTION_SCROLLING_LEFT);
+        boolean canScrollVertically =
+                view.canScrollVertically(DIRECTION_SCROLLING_TOP) && view.canScrollVertically(DIRECTION_SCROLLING_BOTTOM);
         if (shouldOverrideTouchPriority) {
             viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
         } else if (event.getPointerCount() >= pointerCount || canScrollHorizontally || canScrollVertically) {
