@@ -1,3 +1,10 @@
+## 3.2.4 (2023-12-26)
+* Add a minimum value before triggering the touch priority
+* Fix some warnings
+
+## 3.2.3 (2023-12-07)
+* Add the possibility to customize the page handle
+
 ## 3.2.0-beta.3 (2022-05-22)
 * Change minimum SDK version to 19
 * Drop MIPS support

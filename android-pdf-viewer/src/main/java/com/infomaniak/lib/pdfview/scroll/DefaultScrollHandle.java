@@ -24,8 +24,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
     private static final int HANDLE_WIDTH = 65;
     private static final int HANDLE_HEIGHT = 40;
-    private static final int DEFAULT_TEXT_SIZE = 12;
     private static final int NO_ALIGN = -1;
+    private static final int TOUCH_POINTER_COUNT = 1;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final boolean inverted;
@@ -350,7 +350,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
         hasStartedDragging = true;
 
-        TouchUtils.handleTouchPriority(event, this, 1);
+        TouchUtils.handleTouchPriority(event, this, TOUCH_POINTER_COUNT, false, pdfView.isZooming());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 pdfView.stopFling();

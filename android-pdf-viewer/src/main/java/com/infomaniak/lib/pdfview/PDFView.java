@@ -277,6 +277,10 @@ public class PDFView extends RelativeLayout {
         decodingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    public boolean isShown() {
+        return state == State.SHOWN;
+    }
+
     /**
      * Go to the given page.
      *
@@ -1536,8 +1540,8 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
-        public Configurator disableLongpress() {
-            PDFView.this.dragPinchManager.disableLongpress();
+        public Configurator disableLongPress() {
+            PDFView.this.dragPinchManager.disableLongPress();
             return this;
         }
 

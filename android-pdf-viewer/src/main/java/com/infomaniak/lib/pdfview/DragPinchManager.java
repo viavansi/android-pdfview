@@ -17,6 +17,8 @@ package com.infomaniak.lib.pdfview;
 
 import static com.infomaniak.lib.pdfview.util.Constants.Pinch.MAXIMUM_ZOOM;
 import static com.infomaniak.lib.pdfview.util.Constants.Pinch.MINIMUM_ZOOM;
+import static com.infomaniak.lib.pdfview.util.TouchUtils.DIRECTION_SCROLLING_LEFT;
+import static com.infomaniak.lib.pdfview.util.TouchUtils.DIRECTION_SCROLLING_RIGHT;
 
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -24,6 +26,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.infomaniak.lib.pdfview.model.LinkTapEvent;
 import com.infomaniak.lib.pdfview.scroll.ScrollHandle;
@@ -36,19 +40,29 @@ import com.shockwave.pdfium.util.SizeF;
  * This Manager takes care of moving the PDFView,
  * set its zoom track user actions.
  */
-class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener,
-        ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
+class DragPinchManager implements
+        GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener,
+        ScaleGestureDetector.OnScaleGestureListener,
+        View.OnTouchListener {
 
-    private PDFView pdfView;
-    private AnimationManager animationManager;
+    private static final float MIN_TRIGGER_DELTA_X_TOUCH_PRIORITY = 150F;
+    private static final float MIN_TRIGGER_DELTA_Y_TOUCH_PRIORITY = 100F;
+    private static final float STARTING_TOUCH_POSITION_NOT_INITIALIZED = -1F;
+    private static final int TOUCH_POINTER_COUNT = 2;
 
-    private GestureDetector gestureDetector;
-    private ScaleGestureDetector scaleGestureDetector;
+    private final PDFView pdfView;
+    private final AnimationManager animationManager;
+
+    private final GestureDetector gestureDetector;
+    private final ScaleGestureDetector scaleGestureDetector;
 
     private boolean scrolling = false;
     private boolean scaling = false;
     private boolean enabled = false;
     private boolean hasTouchPriority = false;
+    private float startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+    private float startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
 
     DragPinchManager(PDFView pdfView, AnimationManager animationManager) {
         this.pdfView = pdfView;
@@ -74,12 +88,12 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         this.hasTouchPriority = hasTouchPriority;
     }
 
-    void disableLongpress() {
+    void disableLongPress() {
         gestureDetector.setIsLongpressEnabled(false);
     }
 
     @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
+    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
         boolean onTapHandled = pdfView.callbacks.callOnTap(e);
         boolean linkTapped = checkLinkTapped(e.getX(), e.getY());
         if (!onTapHandled && !linkTapped) {
@@ -137,7 +151,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         } else {
             direction = velocityX > 0 ? -1 : 1;
         }
-        // get the focused page during the down event to ensure only a single page is changed
+        // Get the focused page during the down event to ensure only a single page is changed
         float delta = pdfView.isSwipeVertical() ? ev.getY() - downEvent.getY() :
                 ev.getX() - downEvent.getX();
         float offsetX = pdfView.getCurrentXOffset() - delta * pdfView.getZoom();
@@ -151,7 +165,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onDoubleTap(MotionEvent e) {
+    public boolean onDoubleTap(@NonNull MotionEvent e) {
         if (!pdfView.isDoubletapEnabled()) {
             return false;
         }
@@ -167,28 +181,28 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
+    public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
         return false;
     }
 
     @Override
-    public boolean onDown(MotionEvent e) {
+    public boolean onDown(@NonNull MotionEvent e) {
         animationManager.stopFling();
         return true;
     }
 
     @Override
-    public void onShowPress(MotionEvent e) {
-
+    public void onShowPress(@NonNull MotionEvent e) {
+        // Nothing to do here since we don't want to show anything when the user press the view
     }
 
     @Override
-    public boolean onSingleTapUp(MotionEvent e) {
+    public boolean onSingleTapUp(@NonNull MotionEvent e) {
         return false;
     }
 
     @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+    public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
         scrolling = true;
         if (pdfView.isZooming() || pdfView.isSwipeEnabled()) {
             pdfView.moveRelativeTo(-distanceX, -distanceY);
@@ -199,7 +213,7 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         return true;
     }
 
-    private void onScrollEnd(MotionEvent event) {
+    private void onScrollEnd() {
         pdfView.loadPages();
         hideHandle();
         if (!animationManager.isFlinging()) {
@@ -208,12 +222,12 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {
+    public void onLongPress(@NonNull MotionEvent e) {
         pdfView.callbacks.callOnLongPress(e);
     }
 
     @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
         if (!pdfView.isSwipeEnabled()) {
             return false;
         }
@@ -285,13 +299,13 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
     }
 
     @Override
-    public boolean onScaleBegin(ScaleGestureDetector detector) {
+    public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
         scaling = true;
         return true;
     }
 
     @Override
-    public void onScaleEnd(ScaleGestureDetector detector) {
+    public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
         pdfView.loadPages();
         hideHandle();
         scaling = false;
@@ -306,18 +320,54 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
         boolean retVal = scaleGestureDetector.onTouchEvent(event);
         retVal = gestureDetector.onTouchEvent(event) || retVal;
 
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            if (scrolling) {
-                scrolling = false;
-                onScrollEnd(event);
-            }
+        if (event.getAction() == MotionEvent.ACTION_MOVE && event.getPointerCount() >= TOUCH_POINTER_COUNT) {
+            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_UP && scrolling) {
+            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            startingTouchYPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            scrolling = false;
+            onScrollEnd();
         }
 
         if (hasTouchPriority) {
-            TouchUtils.handleTouchPriority(event, v, 2);
+            TouchUtils.handleTouchPriority(
+                    event,
+                    v,
+                    TOUCH_POINTER_COUNT,
+                    shouldOverrideTouchPriority(v, event),
+                    pdfView.isZooming()
+            );
         }
 
         return retVal;
+    }
+
+    private boolean shouldOverrideTouchPriority(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (!v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) || !v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT)) {
+                startingTouchXPosition = event.getX();
+            } else {
+                startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            }
+
+            startingTouchYPosition = event.getY();
+        }
+
+        boolean canScrollHorizontally = v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) && v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT);
+        if (event.getAction() == MotionEvent.ACTION_MOVE && canScrollHorizontally) {
+            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+        }
+
+        if (startingTouchXPosition == STARTING_TOUCH_POSITION_NOT_INITIALIZED) {
+            return false;
+        } else {
+            float deltaX = Math.abs(event.getX() - startingTouchXPosition);
+            float deltaY = Math.abs(event.getY() - startingTouchYPosition);
+            return deltaX >= MIN_TRIGGER_DELTA_X_TOUCH_PRIORITY && deltaY < MIN_TRIGGER_DELTA_Y_TOUCH_PRIORITY;
+        }
     }
 
     private void hideHandle() {
