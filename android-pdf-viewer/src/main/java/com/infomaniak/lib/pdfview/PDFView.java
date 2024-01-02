@@ -40,6 +40,8 @@ import com.infomaniak.lib.pdfview.exception.PageRenderingException;
 import com.infomaniak.lib.pdfview.link.DefaultLinkHandler;
 import com.infomaniak.lib.pdfview.link.LinkHandler;
 import com.infomaniak.lib.pdfview.listener.Callbacks;
+import com.infomaniak.lib.pdfview.listener.OnAttachCompleteListener;
+import com.infomaniak.lib.pdfview.listener.OnDetachCompleteListener;
 import com.infomaniak.lib.pdfview.listener.OnDrawListener;
 import com.infomaniak.lib.pdfview.listener.OnErrorListener;
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener;
@@ -181,7 +183,7 @@ public class PDFView extends RelativeLayout {
 
     private boolean enableSwipe = true;
 
-    private boolean doubletapEnabled = true;
+    private boolean doubleTapEnabled = true;
 
     private boolean nightMode = false;
 
@@ -398,12 +400,12 @@ public class PDFView extends RelativeLayout {
         }
     }
 
-    void enableDoubletap(boolean enableDoubletap) {
-        this.doubletapEnabled = enableDoubletap;
+    void enableDoubleTap(boolean enableDoubleTap) {
+        this.doubleTapEnabled = enableDoubleTap;
     }
 
-    boolean isDoubletapEnabled() {
-        return doubletapEnabled;
+    boolean isDoubleTapEnabled() {
+        return doubleTapEnabled;
     }
 
     void onPageError(PageRenderingException ex) {
@@ -445,7 +447,7 @@ public class PDFView extends RelativeLayout {
         currentXOffset = currentYOffset = 0;
         zoom = 1f;
         recycled = true;
-        callbacks = new Callbacks();
+        callbacks.clear();
         state = State.DEFAULT;
     }
 
@@ -466,6 +468,7 @@ public class PDFView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        callbacks.callOnAttachComplete();
         if (renderingHandlerThread == null) {
             renderingHandlerThread = new HandlerThread("PDF renderer");
         }
@@ -473,6 +476,7 @@ public class PDFView extends RelativeLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        callbacks.callOnDetachComplete();
         recycle();
         if (renderingHandlerThread != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -1357,6 +1361,8 @@ public class PDFView extends RelativeLayout {
         private OnDrawListener onDrawAllListener;
 
         private OnLoadCompleteListener onLoadCompleteListener;
+        private OnAttachCompleteListener onAttachCompleteListener;
+        private OnDetachCompleteListener onDetachCompleteListener;
 
         private OnErrorListener onErrorListener;
 
@@ -1437,6 +1443,16 @@ public class PDFView extends RelativeLayout {
 
         public Configurator onLoad(OnLoadCompleteListener onLoadCompleteListener) {
             this.onLoadCompleteListener = onLoadCompleteListener;
+            return this;
+        }
+
+        public Configurator onAttach(OnAttachCompleteListener onAttachCompleteListener) {
+            this.onAttachCompleteListener = onAttachCompleteListener;
+            return this;
+        }
+
+        public Configurator onDetach(OnDetachCompleteListener onDetachCompleteListener) {
+            this.onDetachCompleteListener = onDetachCompleteListener;
             return this;
         }
 
@@ -1557,6 +1573,8 @@ public class PDFView extends RelativeLayout {
             }
             PDFView.this.recycle();
             PDFView.this.callbacks.setOnLoadComplete(onLoadCompleteListener);
+            PDFView.this.callbacks.setOnAttachCompleteListener(onAttachCompleteListener);
+            PDFView.this.callbacks.setOnDetachCompleteListener(onDetachCompleteListener);
             PDFView.this.callbacks.setOnError(onErrorListener);
             PDFView.this.callbacks.setOnDraw(onDrawListener);
             PDFView.this.callbacks.setOnDrawAll(onDrawAllListener);
@@ -1569,7 +1587,7 @@ public class PDFView extends RelativeLayout {
             PDFView.this.callbacks.setLinkHandler(linkHandler);
             PDFView.this.setSwipeEnabled(enableSwipe);
             PDFView.this.setNightMode(nightMode);
-            PDFView.this.enableDoubletap(enableDoubletap);
+            PDFView.this.enableDoubleTap(enableDoubletap);
             PDFView.this.setDefaultPage(defaultPage);
             PDFView.this.setSwipeVertical(!swipeHorizontal);
             PDFView.this.enableAnnotationRendering(annotationRendering);

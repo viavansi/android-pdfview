@@ -1,3 +1,6 @@
+## 3.2.5 (2024-01-02)
+* Add onAttach and onDetach listeners
+
 ## 3.2.4 (2023-12-26)
 * Add a minimum value before triggering the touch priority
 * Fix some warnings

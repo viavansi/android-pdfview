@@ -26,6 +26,8 @@ public class Callbacks {
      * Call back object to call when the PDF is loaded
      */
     private OnLoadCompleteListener onLoadCompleteListener;
+    private OnAttachCompleteListener onAttachCompleteListener;
+    private OnDetachCompleteListener onDetachCompleteListener;
 
     /**
      * Call back object to call when document loading error occurs
@@ -81,6 +83,26 @@ public class Callbacks {
     public void callOnLoadComplete(int pagesCount) {
         if (onLoadCompleteListener != null) {
             onLoadCompleteListener.loadComplete(pagesCount);
+        }
+    }
+
+    public void setOnAttachCompleteListener(OnAttachCompleteListener onAttachCompleteListener) {
+        this.onAttachCompleteListener = onAttachCompleteListener;
+    }
+
+    public void setOnDetachCompleteListener(OnDetachCompleteListener onDetachCompleteListener) {
+        this.onDetachCompleteListener = onDetachCompleteListener;
+    }
+
+    public void callOnAttachComplete() {
+        if (onAttachCompleteListener != null) {
+            onAttachCompleteListener.onAttachComplete();
+        }
+    }
+
+    public void callOnDetachComplete() {
+        if (onDetachCompleteListener != null) {
+            onDetachCompleteListener.onDetachComplete();
         }
     }
 
@@ -176,5 +198,20 @@ public class Callbacks {
         if (linkHandler != null) {
             linkHandler.handleLinkEvent(event);
         }
+    }
+
+    public void clear() {
+        // Not clearing onAttach and onDetach listeners because those are called before view initialization
+        onLoadCompleteListener = null;
+        onErrorListener = null;
+        onPageErrorListener = null;
+        onRenderListener = null;
+        onPageChangeListener = null;
+        onPageScrollListener = null;
+        onDrawListener = null;
+        onDrawAllListener = null;
+        onTapListener = null;
+        onLongPressListener = null;
+        linkHandler = null;
     }
 }
