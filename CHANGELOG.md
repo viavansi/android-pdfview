@@ -1,3 +1,7 @@
+## 3.2.7 (2024-01-02)
+* Change the way we declare the dependency in order to be able to use the exception created in 
+  application that uses this library
+
 ## 3.2.5 (2024-01-02)
 * Add onAttach and onDetach listeners
 
