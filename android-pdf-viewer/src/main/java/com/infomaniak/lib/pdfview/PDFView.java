@@ -40,6 +40,8 @@ import com.infomaniak.lib.pdfview.exception.PageRenderingException;
 import com.infomaniak.lib.pdfview.link.DefaultLinkHandler;
 import com.infomaniak.lib.pdfview.link.LinkHandler;
 import com.infomaniak.lib.pdfview.listener.Callbacks;
+import com.infomaniak.lib.pdfview.listener.OnAttachCompleteListener;
+import com.infomaniak.lib.pdfview.listener.OnDetachCompleteListener;
 import com.infomaniak.lib.pdfview.listener.OnDrawListener;
 import com.infomaniak.lib.pdfview.listener.OnErrorListener;
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener;
@@ -181,7 +183,7 @@ public class PDFView extends RelativeLayout {
 
     private boolean enableSwipe = true;
 
-    private boolean doubletapEnabled = true;
+    private boolean doubleTapEnabled = true;
 
     private boolean nightMode = false;
 
@@ -398,12 +400,12 @@ public class PDFView extends RelativeLayout {
         }
     }
 
-    void enableDoubletap(boolean enableDoubletap) {
-        this.doubletapEnabled = enableDoubletap;
+    void enableDoubleTap(boolean enableDoubleTap) {
+        this.doubleTapEnabled = enableDoubleTap;
     }
 
-    boolean isDoubletapEnabled() {
-        return doubletapEnabled;
+    boolean isDoubleTapEnabled() {
+        return doubleTapEnabled;
     }
 
     void onPageError(PageRenderingException ex) {
@@ -1585,7 +1587,7 @@ public class PDFView extends RelativeLayout {
             PDFView.this.callbacks.setLinkHandler(linkHandler);
             PDFView.this.setSwipeEnabled(enableSwipe);
             PDFView.this.setNightMode(nightMode);
-            PDFView.this.enableDoubletap(enableDoubletap);
+            PDFView.this.enableDoubleTap(enableDoubletap);
             PDFView.this.setDefaultPage(defaultPage);
             PDFView.this.setSwipeVertical(!swipeHorizontal);
             PDFView.this.enableAnnotationRendering(annotationRendering);

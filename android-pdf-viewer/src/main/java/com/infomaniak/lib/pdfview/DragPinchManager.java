@@ -166,7 +166,7 @@ class DragPinchManager implements
 
     @Override
     public boolean onDoubleTap(@NonNull MotionEvent e) {
-        if (!pdfView.isDoubletapEnabled()) {
+        if (!pdfView.isDoubleTapEnabled()) {
             return false;
         }
 
