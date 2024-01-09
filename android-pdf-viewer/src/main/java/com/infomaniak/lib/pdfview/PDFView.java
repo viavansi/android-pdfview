@@ -1268,18 +1268,6 @@ public class PDFView extends RelativeLayout {
         return pageFling;
     }
 
-    private void setPageSeparatorSpacing(int pageSeparatorSpacingDp) {
-        this.pageSeparatorSpacing = Util.getDP(getContext(), pageSeparatorSpacingDp);
-    }
-
-    private void setStartSpacing(int startSpacing) {
-        this.startSpacing = Util.getDP(getContext(), startSpacing);
-    }
-
-    private void setEndSpacing(int endSpacing) {
-        this.endSpacing = Util.getDP(getContext(), endSpacing);
-    }
-
     private void setAutoSpacing(boolean autoSpacing) {
         this.autoSpacing = autoSpacing;
     }
@@ -1633,9 +1621,6 @@ public class PDFView extends RelativeLayout {
             PDFView.this.enableAnnotationRendering(annotationRendering);
             PDFView.this.setScrollHandle(scrollHandle);
             PDFView.this.enableAntialiasing(antialiasing);
-            PDFView.this.setPageSeparatorSpacing(pageSeparatorSpacing);
-            PDFView.this.setStartSpacing(startSpacing);
-            PDFView.this.setEndSpacing(endSpacing);
             PDFView.this.setAutoSpacing(autoSpacing);
             PDFView.this.setPageFitPolicy(pageFitPolicy);
             PDFView.this.setFitEachPage(fitEachPage);
@@ -1645,12 +1630,27 @@ public class PDFView extends RelativeLayout {
             PDFView.this.setMinZoom(minZoom);
             PDFView.this.setMidZoom(midZoom);
             PDFView.this.setMaxZoom(maxZoom);
+            setPageSeparatorSpacing(pageSeparatorSpacing);
+            setStartSpacing(startSpacing);
+            setEndSpacing(endSpacing);
 
             if (pageNumbers != null) {
                 PDFView.this.load(documentSource, password, pageNumbers);
             } else {
                 PDFView.this.load(documentSource, password);
             }
+        }
+
+        private void setPageSeparatorSpacing(int pageSeparatorSpacingDp) {
+            PDFView.this.pageSeparatorSpacing = Util.getDP(getContext(), pageSeparatorSpacingDp);
+        }
+
+        private void setStartSpacing(int startSpacing) {
+            PDFView.this.startSpacing = Util.getDP(getContext(), startSpacing);
+        }
+
+        private void setEndSpacing(int endSpacing) {
+            PDFView.this.endSpacing = Util.getDP(getContext(), endSpacing);
         }
     }
 }
