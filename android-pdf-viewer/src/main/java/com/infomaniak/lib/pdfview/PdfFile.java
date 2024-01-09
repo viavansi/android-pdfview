@@ -209,6 +209,8 @@ class PdfFile {
                 pageOffsets.add(offset);
                 offset += size + pageSpacing.get(i) / 2f;
             } else {
+                // Adding a space at the beginning to be able to zoom out with a space between the top of the screen
+                // and the first page of the PDF
                 if (i == 0) {
                     offset += displayOptions.pdfSpacing.startSpacing;
                 }
