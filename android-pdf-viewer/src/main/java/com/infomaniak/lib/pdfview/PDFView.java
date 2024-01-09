@@ -300,7 +300,7 @@ public class PDFView extends RelativeLayout {
         }
 
         page = pdfFile.determineValidPageNumberFrom(page);
-        float offset = -pdfFile.getPageOffset(page, zoom);
+        float offset = -pdfFile.getPageOffset(page, zoom) + pageSeparatorSpacing;
         if (swipeVertical) {
             if (withAnimation) {
                 animationManager.startYAnimation(currentYOffset, offset);
