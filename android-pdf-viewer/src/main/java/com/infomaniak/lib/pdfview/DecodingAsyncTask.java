@@ -64,7 +64,6 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
                         getViewSize(pdfView),
                         pdfView.getPageFitPolicy());
                 pdfFile = new PdfFile(
-                        pdfView.getContext(),
                         pdfiumCore,
                         pdfDocument,
                         userPages,

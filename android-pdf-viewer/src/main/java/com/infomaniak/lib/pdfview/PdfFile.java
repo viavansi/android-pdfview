@@ -15,14 +15,12 @@
  */
 package com.infomaniak.lib.pdfview;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.SparseBooleanArray;
 
 import com.infomaniak.lib.pdfview.exception.PageRenderingException;
-import com.infomaniak.lib.pdfview.util.FitPolicy;
 import com.infomaniak.lib.pdfview.util.PageSizeCalculator;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
@@ -37,7 +35,6 @@ class PdfFile {
     private static final Object lock = new Object();
 
     private PdfDocument pdfDocument;
-    private Context context;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
     /** Original page sizes */
@@ -69,13 +66,11 @@ class PdfFile {
     private DisplayOptions displayOptions;
 
     PdfFile(
-            Context context,
             PdfiumCore pdfiumCore,
             PdfDocument pdfDocument,
             int[] originalUserPages,
             DisplayOptions displayOptions
     ) {
-        this.context = context;
         this.pdfiumCore = pdfiumCore;
         this.pdfDocument = pdfDocument;
         this.originalUserPages = originalUserPages;
@@ -112,7 +107,6 @@ class PdfFile {
     public void recalculatePageSizes(Size viewSize) {
         pageSizes.clear();
         PageSizeCalculator calculator = new PageSizeCalculator(
-                context,
                 displayOptions.pageFitPolicy,
                 originalMaxWidthPageSize,
                 originalMaxHeightPageSize,

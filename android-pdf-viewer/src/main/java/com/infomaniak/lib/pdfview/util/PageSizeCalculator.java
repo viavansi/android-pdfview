@@ -15,14 +15,10 @@
  */
 package com.infomaniak.lib.pdfview.util;
 
-import android.content.Context;
-
 import com.shockwave.pdfium.util.Size;
 import com.shockwave.pdfium.util.SizeF;
 
 public class PageSizeCalculator {
-
-    private Context context;
     private FitPolicy fitPolicy;
     private final Size originalMaxWidthPageSize;
     private final Size originalMaxHeightPageSize;
@@ -33,12 +29,10 @@ public class PageSizeCalculator {
     private float heightRatio;
     private boolean fitEachPage;
 
-    public PageSizeCalculator(Context context,
-                              FitPolicy fitPolicy,
+    public PageSizeCalculator(FitPolicy fitPolicy,
                               Size originalMaxWidthPageSize,
                               Size originalMaxHeightPageSize,
                               Size viewSize, boolean fitEachPage) {
-        this.context = context;
         this.fitPolicy = fitPolicy;
         this.originalMaxWidthPageSize = originalMaxWidthPageSize;
         this.originalMaxHeightPageSize = originalMaxHeightPageSize;
