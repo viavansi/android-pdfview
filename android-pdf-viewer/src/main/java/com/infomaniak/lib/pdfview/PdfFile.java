@@ -111,8 +111,14 @@ class PdfFile {
      */
     public void recalculatePageSizes(Size viewSize) {
         pageSizes.clear();
-        PageSizeCalculator calculator = new PageSizeCalculator(context, displayOptions.pageFitPolicy, originalMaxWidthPageSize,
-                originalMaxHeightPageSize, viewSize, displayOptions.fitEachPage);
+        PageSizeCalculator calculator = new PageSizeCalculator(
+                context,
+                displayOptions.pageFitPolicy,
+                originalMaxWidthPageSize,
+                originalMaxHeightPageSize,
+                viewSize,
+                displayOptions.fitEachPage
+        );
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
 
