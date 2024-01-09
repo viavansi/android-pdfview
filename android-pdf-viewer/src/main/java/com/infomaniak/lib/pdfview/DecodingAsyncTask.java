@@ -51,8 +51,18 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
             PDFView pdfView = pdfViewReference.get();
             if (pdfView != null) {
                 PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
-                pdfFile = new PdfFile(pdfiumCore, pdfDocument, pdfView.getPageFitPolicy(), getViewSize(pdfView),
-                        userPages, pdfView.isSwipeVertical(), pdfView.getSpacingPx(), pdfView.isAutoSpacingEnabled(),
+                pdfFile = new PdfFile(
+                        pdfView.getContext(),
+                        pdfiumCore,
+                        pdfDocument,
+                        pdfView.getPageFitPolicy(),
+                        getViewSize(pdfView),
+                        userPages,
+                        pdfView.isSwipeVertical(),
+                        pdfView.getPageSeparatorSpacing(),
+                        pdfView.getStartSpacing(),
+                        pdfView.getEndSpacing(),
+                        pdfView.isAutoSpacingEnabled(),
                         pdfView.isFitEachPage());
                 return null;
             } else {

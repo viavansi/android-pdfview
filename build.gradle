@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.3'
+        classpath 'com.android.tools.build:gradle:8.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
@@ -28,6 +28,6 @@ ext {
             minSdk      : 21,
             targetSdk   : 34,
             compileSdk  : 34,
-            versionName: '3.2.7'
+            versionName: '3.2.8'
     ]
 }

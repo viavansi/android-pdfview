@@ -288,7 +288,7 @@ class DragPinchManager implements
         float dr = detector.getScaleFactor();
         float wantedZoom = pdfView.getZoom() * dr;
         float minZoom = Math.min(MINIMUM_ZOOM, pdfView.getMinZoom());
-        float maxZoom = Math.min(MAXIMUM_ZOOM, pdfView.getMaxZoom());
+        float maxZoom = Math.max(MAXIMUM_ZOOM, pdfView.getMaxZoom());
         if (wantedZoom < minZoom) {
             dr = minZoom / pdfView.getZoom();
         } else if (wantedZoom > maxZoom) {

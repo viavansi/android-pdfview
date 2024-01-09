@@ -15,6 +15,7 @@
  */
 package com.infomaniak.lib.pdfview;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -34,7 +35,9 @@ import java.util.List;
 class PdfFile {
 
     private static final Object lock = new Object();
+
     private PdfDocument pdfDocument;
+    private Context context;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
     /** Original page sizes */
@@ -54,7 +57,11 @@ class PdfFile {
     /** True if scrolling is vertical, else it's horizontal */
     private boolean isVertical;
     /** Fixed spacing between pages in pixels */
-    private int spacingPx;
+    private int pageSeparatorSpacing;
+    /** Fixed spacing between pages in pixels */
+    private int startSpacing;
+    /** Fixed spacing between pages in pixels */
+    private int endSpacing;
     /** Calculate spacing automatically so each page fits on it's own in the center of the view */
     private boolean autoSpacing;
     /** Calculated offsets for pages */
@@ -75,14 +82,29 @@ class PdfFile {
      */
     private int[] originalUserPages;
 
-    PdfFile(PdfiumCore pdfiumCore, PdfDocument pdfDocument, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
+    PdfFile(
+            Context context,
+            PdfiumCore pdfiumCore,
+            PdfDocument pdfDocument,
+            FitPolicy pageFitPolicy,
+            Size viewSize,
+            int[] originalUserPages,
+            boolean isVertical,
+            int pageSeparatorSpacing,
+            int startSpacing,
+            int endSpacing,
+            boolean autoSpacing,
+            boolean fitEachPage
+    ) {
+        this.context = context;
         this.pdfiumCore = pdfiumCore;
         this.pdfDocument = pdfDocument;
         this.pageFitPolicy = pageFitPolicy;
         this.originalUserPages = originalUserPages;
         this.isVertical = isVertical;
-        this.spacingPx = spacing;
+        this.pageSeparatorSpacing = pageSeparatorSpacing;
+        this.startSpacing = startSpacing;
+        this.endSpacing = endSpacing;
         this.autoSpacing = autoSpacing;
         this.fitEachPage = fitEachPage;
         setup(viewSize);
@@ -116,7 +138,7 @@ class PdfFile {
      */
     public void recalculatePageSizes(Size viewSize) {
         pageSizes.clear();
-        PageSizeCalculator calculator = new PageSizeCalculator(pageFitPolicy, originalMaxWidthPageSize,
+        PageSizeCalculator calculator = new PageSizeCalculator(context, pageFitPolicy, originalMaxWidthPageSize,
                 originalMaxHeightPageSize, viewSize, fitEachPage);
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
@@ -172,7 +194,7 @@ class PdfFile {
             float spacing = Math.max(0, isVertical ? viewSize.getHeight() - pageSize.getHeight() :
                     viewSize.getWidth() - pageSize.getWidth());
             if (i < getPagesCount() - 1) {
-                spacing += spacingPx;
+                spacing += pageSeparatorSpacing;
             }
             pageSpacing.add(spacing);
         }
@@ -186,10 +208,10 @@ class PdfFile {
             if (autoSpacing) {
                 length += pageSpacing.get(i);
             } else if (i < getPagesCount() - 1) {
-                length += spacingPx;
+                length += pageSeparatorSpacing;
             }
         }
-        documentLength = length;
+        documentLength = length + startSpacing + endSpacing;
     }
 
     private void preparePagesOffset() {
@@ -201,15 +223,18 @@ class PdfFile {
             if (autoSpacing) {
                 offset += pageSpacing.get(i) / 2f;
                 if (i == 0) {
-                    offset -= spacingPx / 2f;
+                    offset -= pageSeparatorSpacing / 2f;
                 } else if (i == getPagesCount() - 1) {
-                    offset += spacingPx / 2f;
+                    offset += pageSeparatorSpacing / 2f;
                 }
                 pageOffsets.add(offset);
                 offset += size + pageSpacing.get(i) / 2f;
             } else {
+                if (i == 0) {
+                    offset += startSpacing;
+                }
                 pageOffsets.add(offset);
-                offset += size + spacingPx;
+                offset += size + pageSeparatorSpacing;
             }
         }
     }
@@ -227,7 +252,7 @@ class PdfFile {
     }
 
     public float getPageSpacing(int pageIndex, float zoom) {
-        float spacing = autoSpacing ? pageSpacing.get(pageIndex) : spacingPx;
+        float spacing = autoSpacing ? pageSpacing.get(pageIndex) : pageSeparatorSpacing;
         return spacing * zoom;
     }
 
