@@ -1405,9 +1405,9 @@ public class PDFView extends RelativeLayout {
         private int pageSeparatorSpacing = 0;
         private int startSpacing = 0;
         private int endSpacing = 0;
-        private float minZoom = 0f;
-        private float midZoom = 0f;
-        private float maxZoom = 0f;
+        private float minZoom = DEFAULT_MIN_SCALE;
+        private float midZoom = DEFAULT_MID_SCALE;
+        private float maxZoom = DEFAULT_MAX_SCALE;
 
         private boolean autoSpacing = false;
 
