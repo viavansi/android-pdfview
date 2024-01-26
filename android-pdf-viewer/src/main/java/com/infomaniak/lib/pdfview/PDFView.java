@@ -99,7 +99,7 @@ public class PDFView extends RelativeLayout {
 
     public static final float DEFAULT_MAX_SCALE = 3.0f;
     public static final float DEFAULT_MID_SCALE = 1.75f;
-    public static final float DEFAULT_MIN_SCALE = 1.0f;
+    public static final float DEFAULT_MIN_SCALE = 0.93f;
 
     private float minZoom = DEFAULT_MIN_SCALE;
     private float midZoom = DEFAULT_MID_SCALE;
@@ -144,8 +144,8 @@ public class PDFView extends RelativeLayout {
      */
     private float currentYOffset = 0;
 
-    /** The zoom level, always >= 1 */
-    private float zoom = 1f;
+    /** The zoom level, always >= DEFAULT_MIN_SCALE */
+    private float zoom = minZoom;
 
     /** True if the PDFView has been recycled */
     private boolean recycled = true;
@@ -226,7 +226,13 @@ public class PDFView extends RelativeLayout {
             new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
     /** Spacing between pages, in px */
-    private int spacingPx = 0;
+    private int pageSeparatorSpacing = 0;
+
+    /** Start spacing, in px */
+    private int startSpacing = 0;
+
+    /** End spacing, in px */
+    private int endSpacing = 0;
 
     /** Add dynamic spacing to fit each page separately on the screen. */
     private boolean autoSpacing = false;
@@ -294,7 +300,7 @@ public class PDFView extends RelativeLayout {
         }
 
         page = pdfFile.determineValidPageNumberFrom(page);
-        float offset = page == 0 ? 0 : -pdfFile.getPageOffset(page, zoom);
+        float offset = -pdfFile.getPageOffset(page, zoom) + pageSeparatorSpacing;
         if (swipeVertical) {
             if (withAnimation) {
                 animationManager.startYAnimation(currentYOffset, offset);
@@ -445,7 +451,7 @@ public class PDFView extends RelativeLayout {
         scrollHandle = null;
         isScrollHandleInit = false;
         currentXOffset = currentYOffset = 0;
-        zoom = 1f;
+        zoom = DEFAULT_MIN_SCALE;
         recycled = true;
         callbacks.clear();
         state = State.DEFAULT;
@@ -1238,8 +1244,16 @@ public class PDFView extends RelativeLayout {
         this.enableAntialiasing = enableAntialiasing;
     }
 
-    public int getSpacingPx() {
-        return spacingPx;
+    public int getPageSeparatorSpacing() {
+        return pageSeparatorSpacing;
+    }
+
+    public int getStartSpacing() {
+        return startSpacing;
+    }
+
+    public int getEndSpacing() {
+        return endSpacing;
     }
 
     public boolean isAutoSpacingEnabled() {
@@ -1252,10 +1266,6 @@ public class PDFView extends RelativeLayout {
 
     public boolean isPageFlingEnabled() {
         return pageFling;
-    }
-
-    private void setSpacing(int spacingDp) {
-        this.spacingPx = Util.getDP(getContext(), spacingDp);
     }
 
     private void setAutoSpacing(boolean autoSpacing) {
@@ -1392,7 +1402,12 @@ public class PDFView extends RelativeLayout {
 
         private boolean antialiasing = true;
 
-        private int spacing = 0;
+        private int pageSeparatorSpacing = 0;
+        private int startSpacing = 0;
+        private int endSpacing = 0;
+        private float minZoom = DEFAULT_MIN_SCALE;
+        private float midZoom = DEFAULT_MID_SCALE;
+        private float maxZoom = DEFAULT_MAX_SCALE;
 
         private boolean autoSpacing = false;
 
@@ -1522,7 +1537,20 @@ public class PDFView extends RelativeLayout {
         }
 
         public Configurator spacing(int spacing) {
-            this.spacing = spacing;
+            this.pageSeparatorSpacing = spacing;
+            return this;
+        }
+
+        public Configurator startEndSpacing(int startSpacing, int endSpacing) {
+            this.startSpacing = startSpacing;
+            this.endSpacing = endSpacing;
+            return this;
+        }
+
+        public Configurator zoom(float minZoom, float midZoom, float maxZoom) {
+            this.minZoom = minZoom;
+            this.midZoom = midZoom;
+            this.maxZoom = maxZoom;
             return this;
         }
 
@@ -1593,19 +1621,36 @@ public class PDFView extends RelativeLayout {
             PDFView.this.enableAnnotationRendering(annotationRendering);
             PDFView.this.setScrollHandle(scrollHandle);
             PDFView.this.enableAntialiasing(antialiasing);
-            PDFView.this.setSpacing(spacing);
             PDFView.this.setAutoSpacing(autoSpacing);
             PDFView.this.setPageFitPolicy(pageFitPolicy);
             PDFView.this.setFitEachPage(fitEachPage);
             PDFView.this.setPageSnap(pageSnap);
             PDFView.this.setPageFling(pageFling);
             PDFView.this.setTouchPriority(touchPriority);
+            PDFView.this.setMinZoom(minZoom);
+            PDFView.this.setMidZoom(midZoom);
+            PDFView.this.setMaxZoom(maxZoom);
+            setPageSeparatorSpacing(pageSeparatorSpacing);
+            setStartSpacing(startSpacing);
+            setEndSpacing(endSpacing);
 
             if (pageNumbers != null) {
                 PDFView.this.load(documentSource, password, pageNumbers);
             } else {
                 PDFView.this.load(documentSource, password);
             }
+        }
+
+        private void setPageSeparatorSpacing(int pageSeparatorSpacingDp) {
+            PDFView.this.pageSeparatorSpacing = Util.getDP(getContext(), pageSeparatorSpacingDp);
+        }
+
+        private void setStartSpacing(int startSpacing) {
+            PDFView.this.startSpacing = Util.getDP(getContext(), startSpacing);
+        }
+
+        private void setEndSpacing(int endSpacing) {
+            PDFView.this.endSpacing = Util.getDP(getContext(), endSpacing);
         }
     }
 }

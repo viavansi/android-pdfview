@@ -21,7 +21,6 @@ import android.graphics.RectF;
 import android.util.SparseBooleanArray;
 
 import com.infomaniak.lib.pdfview.exception.PageRenderingException;
-import com.infomaniak.lib.pdfview.util.FitPolicy;
 import com.infomaniak.lib.pdfview.util.PageSizeCalculator;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
@@ -34,6 +33,7 @@ import java.util.List;
 class PdfFile {
 
     private static final Object lock = new Object();
+
     private PdfDocument pdfDocument;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
@@ -51,41 +51,31 @@ class PdfFile {
     private SizeF maxHeightPageSize = new SizeF(0, 0);
     /** Scaled page with maximum width */
     private SizeF maxWidthPageSize = new SizeF(0, 0);
-    /** True if scrolling is vertical, else it's horizontal */
-    private boolean isVertical;
-    /** Fixed spacing between pages in pixels */
-    private int spacingPx;
-    /** Calculate spacing automatically so each page fits on it's own in the center of the view */
-    private boolean autoSpacing;
     /** Calculated offsets for pages */
     private List<Float> pageOffsets = new ArrayList<>();
     /** Calculated auto spacing for pages */
     private List<Float> pageSpacing = new ArrayList<>();
     /** Calculated document length (width or height, depending on swipe mode) */
     private float documentLength = 0;
-    private final FitPolicy pageFitPolicy;
-    /**
-     * True if every page should fit separately according to the FitPolicy,
-     * else the largest page fits and other pages scale relatively
-     */
-    private final boolean fitEachPage;
+
     /**
      * The pages the user want to display in order
      * (ex: 0, 2, 2, 8, 8, 1, 1, 1)
      */
     private int[] originalUserPages;
+    private DisplayOptions displayOptions;
 
-    PdfFile(PdfiumCore pdfiumCore, PdfDocument pdfDocument, FitPolicy pageFitPolicy, Size viewSize, int[] originalUserPages,
-            boolean isVertical, int spacing, boolean autoSpacing, boolean fitEachPage) {
+    PdfFile(
+            PdfiumCore pdfiumCore,
+            PdfDocument pdfDocument,
+            int[] originalUserPages,
+            DisplayOptions displayOptions
+    ) {
         this.pdfiumCore = pdfiumCore;
         this.pdfDocument = pdfDocument;
-        this.pageFitPolicy = pageFitPolicy;
         this.originalUserPages = originalUserPages;
-        this.isVertical = isVertical;
-        this.spacingPx = spacing;
-        this.autoSpacing = autoSpacing;
-        this.fitEachPage = fitEachPage;
-        setup(viewSize);
+        this.displayOptions = displayOptions;
+        setup(this.displayOptions.getViewSize());
     }
 
     private void setup(Size viewSize) {
@@ -116,15 +106,20 @@ class PdfFile {
      */
     public void recalculatePageSizes(Size viewSize) {
         pageSizes.clear();
-        PageSizeCalculator calculator = new PageSizeCalculator(pageFitPolicy, originalMaxWidthPageSize,
-                originalMaxHeightPageSize, viewSize, fitEachPage);
+        PageSizeCalculator calculator = new PageSizeCalculator(
+                displayOptions.getPageFitPolicy(),
+                originalMaxWidthPageSize,
+                originalMaxHeightPageSize,
+                viewSize,
+                displayOptions.getFitEachPage()
+        );
         maxWidthPageSize = calculator.getOptimalMaxWidthPageSize();
         maxHeightPageSize = calculator.getOptimalMaxHeightPageSize();
 
         for (Size size : originalPageSizes) {
             pageSizes.add(calculator.calculate(size));
         }
-        if (autoSpacing) {
+        if (displayOptions.getPdfSpacing().getAutoSpacing()) {
             prepareAutoSpacing(viewSize);
         }
         prepareDocLen();
@@ -154,7 +149,7 @@ class PdfFile {
      * @return size of page
      */
     public SizeF getMaxPageSize() {
-        return isVertical ? maxWidthPageSize : maxHeightPageSize;
+        return displayOptions.isVertical() ? maxWidthPageSize : maxHeightPageSize;
     }
 
     public float getMaxPageWidth() {
@@ -169,10 +164,10 @@ class PdfFile {
         pageSpacing.clear();
         for (int i = 0; i < getPagesCount(); i++) {
             SizeF pageSize = pageSizes.get(i);
-            float spacing = Math.max(0, isVertical ? viewSize.getHeight() - pageSize.getHeight() :
+            float spacing = Math.max(0, displayOptions.isVertical() ? viewSize.getHeight() - pageSize.getHeight() :
                     viewSize.getWidth() - pageSize.getWidth());
             if (i < getPagesCount() - 1) {
-                spacing += spacingPx;
+                spacing += displayOptions.getPdfSpacing().getPageSeparatorSpacing();
             }
             pageSpacing.add(spacing);
         }
@@ -182,14 +177,14 @@ class PdfFile {
         float length = 0;
         for (int i = 0; i < getPagesCount(); i++) {
             SizeF pageSize = pageSizes.get(i);
-            length += isVertical ? pageSize.getHeight() : pageSize.getWidth();
-            if (autoSpacing) {
+            length += displayOptions.isVertical() ? pageSize.getHeight() : pageSize.getWidth();
+            if (displayOptions.getPdfSpacing().getAutoSpacing()) {
                 length += pageSpacing.get(i);
             } else if (i < getPagesCount() - 1) {
-                length += spacingPx;
+                length += displayOptions.getPdfSpacing().getPageSeparatorSpacing();
             }
         }
-        documentLength = length;
+        documentLength = length + displayOptions.getPdfSpacing().getStartSpacing() + displayOptions.getPdfSpacing().getEndSpacing();
     }
 
     private void preparePagesOffset() {
@@ -197,19 +192,24 @@ class PdfFile {
         float offset = 0;
         for (int i = 0; i < getPagesCount(); i++) {
             SizeF pageSize = pageSizes.get(i);
-            float size = isVertical ? pageSize.getHeight() : pageSize.getWidth();
-            if (autoSpacing) {
+            float size = displayOptions.isVertical() ? pageSize.getHeight() : pageSize.getWidth();
+            if (displayOptions.getPdfSpacing().getAutoSpacing()) {
                 offset += pageSpacing.get(i) / 2f;
                 if (i == 0) {
-                    offset -= spacingPx / 2f;
+                    offset -= displayOptions.getPdfSpacing().getPageSeparatorSpacing() / 2f;
                 } else if (i == getPagesCount() - 1) {
-                    offset += spacingPx / 2f;
+                    offset += displayOptions.getPdfSpacing().getPageSeparatorSpacing() / 2f;
                 }
                 pageOffsets.add(offset);
                 offset += size + pageSpacing.get(i) / 2f;
             } else {
+                // Adding a space at the beginning to be able to zoom out with a space between the top of the screen
+                // and the first page of the PDF
+                if (i == 0) {
+                    offset += displayOptions.getPdfSpacing().getStartSpacing();
+                }
                 pageOffsets.add(offset);
-                offset += size + spacingPx;
+                offset += size + displayOptions.getPdfSpacing().getPageSeparatorSpacing();
             }
         }
     }
@@ -223,11 +223,16 @@ class PdfFile {
      */
     public float getPageLength(int pageIndex, float zoom) {
         SizeF size = getPageSize(pageIndex);
-        return (isVertical ? size.getHeight() : size.getWidth()) * zoom;
+        return (displayOptions.isVertical() ? size.getHeight() : size.getWidth()) * zoom;
     }
 
     public float getPageSpacing(int pageIndex, float zoom) {
-        float spacing = autoSpacing ? pageSpacing.get(pageIndex) : spacingPx;
+        float spacing;
+        if (displayOptions.getPdfSpacing().getAutoSpacing()) {
+            spacing = pageSpacing.get(pageIndex);
+        } else {
+            spacing = displayOptions.getPdfSpacing().getPageSeparatorSpacing();
+        }
         return spacing * zoom;
     }
 
@@ -243,7 +248,7 @@ class PdfFile {
     /** Get secondary page offset, that is X for vertical scroll and Y for horizontal scroll */
     public float getSecondaryPageOffset(int pageIndex, float zoom) {
         SizeF pageSize = getPageSize(pageIndex);
-        if (isVertical) {
+        if (displayOptions.isVertical()) {
             float maxWidth = getMaxPageWidth();
             return zoom * (maxWidth - pageSize.getWidth()) / 2; //x
         } else {

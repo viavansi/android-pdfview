@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.infomaniak.lib.pdfview.PDFView.Configurator
 import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
@@ -42,6 +43,10 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         private const val HANDLE_PADDING_BOTTOM_DP = 40
         private const val PDF_PAGE_SPACING_DP = 10
         private const val DEFAULT_TEXT_SIZE_DP = 16
+        private const val START_END_SPACING_DP = 200
+        private const val MIN_ZOOM = 0.93f
+        private const val MID_ZOOM = 3f
+        private const val MAX_ZOOM = 6f
     }
 
     private var uri: Uri? = null
@@ -121,31 +126,26 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
 
     private fun displayFromAsset(password: String? = null) {
         pdfFileName = SAMPLE_FILE
-        binding.pdfView.fromAsset(SAMPLE_FILE)
-            .defaultPage(pageNumber)
-            .onPageChange(this)
-            .enableAnnotationRendering(true)
-            .onLoad(this)
-            .scrollHandle(pdfScrollHandle)
-            .spacing(PDF_PAGE_SPACING_DP)
-            .onPageError(this)
-            .pageFitPolicy(FitPolicy.BOTH)
-            .password(password)
-            .load()
+        loadPDF(binding.pdfView.fromAsset(SAMPLE_FILE), password)
     }
 
     private fun displayFromUri(uri: Uri?, password: String? = null) {
         pdfFileName = viewModel.getFileName(contentResolver, uri)
-        binding.pdfView.fromUri(uri)
-            .defaultPage(pageNumber)
+        loadPDF(binding.pdfView.fromUri(uri), password)
+    }
+
+    private fun loadPDF(pdfConfigurator: Configurator, password: String? = null) {
+        pdfConfigurator.defaultPage(pageNumber)
             .onPageChange(this)
             .enableAnnotationRendering(true)
             .onLoad(this)
             .scrollHandle(pdfScrollHandle)
             .spacing(PDF_PAGE_SPACING_DP)
-            .password(password)
+            .startEndSpacing(START_END_SPACING_DP, START_END_SPACING_DP)
+            .zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
             .onPageError(this)
-            .onError(this)
+            .pageFitPolicy(FitPolicy.BOTH)
+            .password(password)
             .load()
     }
 
