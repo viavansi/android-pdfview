@@ -1,3 +1,21 @@
+/*
+ * Infomaniak android-pdf-viewer
+ * Copyright (C) 2024 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.infomaniak.lib.pdfpreview.sample
 
 import android.annotation.SuppressLint
@@ -21,6 +39,7 @@ import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
 import com.infomaniak.lib.pdfview.listener.OnPageErrorListener
+import com.infomaniak.lib.pdfview.listener.OnReadyForPrintingListener
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -29,8 +48,13 @@ import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
-class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompleteListener,
-    OnPageErrorListener, OnErrorListener {
+class PDFViewActivity :
+    AppCompatActivity(),
+    OnPageChangeListener,
+    OnLoadCompleteListener,
+    OnPageErrorListener,
+    OnErrorListener
+{
 
     companion object {
         private val TAG: String = PDFViewActivity::class.java.simpleName

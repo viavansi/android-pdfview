@@ -1,17 +1,19 @@
-/**
- * Copyright 2017 Bartosz Schiller
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Infomaniak android-pdf-viewer
+ * Copyright (C) 2024 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.infomaniak.lib.pdfview;
 
@@ -23,7 +25,6 @@ import android.graphics.RectF;
 import com.infomaniak.lib.pdfview.util.Constants;
 import com.infomaniak.lib.pdfview.util.MathUtils;
 import com.infomaniak.lib.pdfview.util.Util;
-
 import com.shockwave.pdfium.util.SizeF;
 
 import java.util.LinkedList;
@@ -95,6 +96,10 @@ class PagesLoader {
     PagesLoader(PDFView pdfView) {
         this.pdfView = pdfView;
         this.preloadOffset = Util.getDP(pdfView.getContext(), PRELOAD_OFFSET);
+    }
+
+    void loadPagesForPrinting(int pagesCount) {
+        loadAllForPrinting(pagesCount);
     }
 
     private void getPageColsRows(GridSize grid, int pageIndex) {
@@ -206,23 +211,51 @@ class PagesLoader {
 
             // calculate the row,col of the point in the leftTop and rightBottom
             if (pdfView.isSwipeVertical()) {
-                range.leftTop.row = MathUtils.floor(Math.abs(pageFirstYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
+                range.leftTop.row = MathUtils.floor(
+                        Math.abs(
+                                pageFirstYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
+                        ) / rowHeight
+                );
                 range.leftTop.col = MathUtils.floor(MathUtils.min(pageFirstXOffset - secondaryOffset, 0) / colWidth);
 
-                range.rightBottom.row = MathUtils.ceil(Math.abs(pageLastYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight);
-                range.rightBottom.col = MathUtils.floor(MathUtils.min(pageLastXOffset - secondaryOffset, 0) / colWidth);
+                range.rightBottom.row = MathUtils.ceil(
+                        Math.abs(
+                                pageLastYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
+                        ) / rowHeight
+                );
+                range.rightBottom.col = MathUtils.floor(
+                        MathUtils.min(pageLastXOffset - secondaryOffset, 0) / colWidth
+                );
             } else {
-                range.leftTop.col = MathUtils.floor(Math.abs(pageFirstXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
-                range.leftTop.row = MathUtils.floor(MathUtils.min(pageFirstYOffset - secondaryOffset, 0) / rowHeight);
+                range.leftTop.col = MathUtils.floor(
+                        Math.abs(
+                                pageFirstXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
+                        ) / colWidth
+                );
+                range.leftTop.row = MathUtils.floor(
+                        MathUtils.min(pageFirstYOffset - secondaryOffset, 0) / rowHeight
+                );
 
-                range.rightBottom.col = MathUtils.floor(Math.abs(pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth);
-                range.rightBottom.row = MathUtils.floor(MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight);
+                range.rightBottom.col = MathUtils.floor(
+                        Math.abs(
+                                pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
+                        ) / colWidth
+                );
+                range.rightBottom.row = MathUtils.floor(
+                        MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight
+                );
             }
 
             renderRanges.add(range);
         }
 
         return renderRanges;
+    }
+
+    private void loadAllForPrinting(int pagesCount) {
+        for (int i = 0; i < pagesCount; i++) {
+            loadThumbnail(i, true);
+        }
     }
 
     private void loadVisible() {
@@ -236,17 +269,23 @@ class PagesLoader {
         List<RenderRange> rangeList = getRenderRangeList(firstXOffset, firstYOffset, lastXOffset, lastYOffset);
 
         for (RenderRange range : rangeList) {
-            loadThumbnail(range.page);
+            loadThumbnail(range.page, false);
         }
 
         for (RenderRange range : rangeList) {
             calculatePartSize(range.gridSize);
-            parts += loadPage(range.page, range.leftTop.row, range.rightBottom.row, range.leftTop.col, range.rightBottom.col, CACHE_SIZE - parts);
+            parts += loadPage(
+                    range.page,
+                    range.leftTop.row,
+                    range.rightBottom.row,
+                    range.leftTop.col,
+                    range.rightBottom.col,
+                    CACHE_SIZE - parts
+            );
             if (parts >= CACHE_SIZE) {
                 break;
             }
         }
-
     }
 
     private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol,
@@ -286,9 +325,16 @@ class PagesLoader {
 
         if (renderWidth > 0 && renderHeight > 0) {
             if (!pdfView.cacheManager.upPartIfContained(page, pageRelativeBounds, cacheOrder)) {
-                pdfView.renderingHandler.addRenderingTask(page, renderWidth, renderHeight,
-                        pageRelativeBounds, false, cacheOrder, pdfView.isBestQuality(),
-                        pdfView.isAnnotationRendering());
+                pdfView.renderingHandler.addRenderingTask(
+                        page,
+                        renderWidth, renderHeight,
+                        pageRelativeBounds,
+                        false,
+                        cacheOrder,
+                        pdfView.isBestQuality(),
+                        pdfView.isAnnotationRendering(),
+                        false
+                );
             }
 
             cacheOrder++;
@@ -297,14 +343,25 @@ class PagesLoader {
         return false;
     }
 
-    private void loadThumbnail(int page) {
+    private void loadThumbnail(int page, boolean isForPrinting) {
         SizeF pageSize = pdfView.pdfFile.getPageSize(page);
-        float thumbnailWidth = pageSize.getWidth() * Constants.THUMBNAIL_RATIO;
-        float thumbnailHeight = pageSize.getHeight() * Constants.THUMBNAIL_RATIO;
+        float thumbnailRatio = isForPrinting ? Constants.THUMBNAIL_RATIO_PRINTING : Constants.THUMBNAIL_RATIO;
+        float thumbnailWidth = pageSize.getWidth() * thumbnailRatio;
+        float thumbnailHeight = pageSize.getHeight() * thumbnailRatio;
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {
-            pdfView.renderingHandler.addRenderingTask(page,
-                    thumbnailWidth, thumbnailHeight, thumbnailRect,
-                    true, 0, pdfView.isBestQuality(), pdfView.isAnnotationRendering());
+            pdfView.renderingHandler.addRenderingTask(
+                    page,
+                    thumbnailWidth,
+                    thumbnailHeight,
+                    thumbnailRect,
+                    true,
+                    0,
+                    pdfView.isBestQuality(),
+                    pdfView.isAnnotationRendering(),
+                    isForPrinting
+            );
+        } else if (page == pdfView.getPageCount() - 1) {
+            pdfView.callbacks.callsOnReadyForPrinting(pdfView.getPagesAsBitmaps());
         }
     }
 
