@@ -65,6 +65,14 @@ internal class RenderingHandler(
         sendMessage(msg)
     }
 
+    fun stop() {
+        running = false
+    }
+
+    fun start() {
+        running = true
+    }
+
     override fun handleMessage(message: Message) {
         val task = message.obj as RenderingTask
         try {
@@ -131,14 +139,6 @@ internal class RenderingHandler(
         renderBounds[0f, 0f, width.toFloat()] = height.toFloat()
         renderMatrix.mapRect(renderBounds)
         renderBounds.round(roundedRenderBounds)
-    }
-
-    fun stop() {
-        running = false
-    }
-
-    fun start() {
-        running = true
     }
 
     data class RenderingSize(
