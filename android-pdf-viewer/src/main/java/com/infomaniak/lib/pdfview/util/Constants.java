@@ -25,7 +25,7 @@ public class Constants {
     public static float THUMBNAIL_RATIO = 0.3f;
 
     /** Minimum quality for printing */
-    public static float THUMBNAIL_RATIO_PRINTING = 0.75f;
+    public static final float THUMBNAIL_RATIO_PRINTING = 0.75f;
 
     /**
      * The size of the rendered parts (default 256)
