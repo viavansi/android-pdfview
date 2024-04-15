@@ -26,6 +26,7 @@ import com.infomaniak.lib.pdfview.util.Constants;
 import com.infomaniak.lib.pdfview.util.MathUtils;
 import com.infomaniak.lib.pdfview.util.Util;
 import com.shockwave.pdfium.util.SizeF;
+import com.infomaniak.lib.pdfview.RenderingHandler.RenderingSize;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -327,8 +328,7 @@ class PagesLoader {
             if (!pdfView.cacheManager.upPartIfContained(page, pageRelativeBounds, cacheOrder)) {
                 pdfView.renderingHandler.addRenderingTask(
                         page,
-                        renderWidth, renderHeight,
-                        pageRelativeBounds,
+                        new RenderingSize(renderWidth, renderHeight, pageRelativeBounds),
                         false,
                         cacheOrder,
                         pdfView.isBestQuality(),
@@ -351,9 +351,7 @@ class PagesLoader {
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {
             pdfView.renderingHandler.addRenderingTask(
                     page,
-                    thumbnailWidth,
-                    thumbnailHeight,
-                    thumbnailRect,
+                    new RenderingSize(thumbnailWidth, thumbnailHeight, thumbnailRect),
                     true,
                     0,
                     pdfView.isBestQuality(),
