@@ -835,7 +835,8 @@ public class PDFView extends RelativeLayout {
     }
 
     /**
-     * Force the generation of bitmaps for all pages
+     * Force the generation of bitmaps for all pages.
+     * Implement {@link com.infomaniak.lib.pdfview.listener.OnReadyForPrintingListener} to retrieve the bitmaps.
      */
     public void loadPagesForPrinting() {
         if (pdfFile == null || renderingHandler == null) {
