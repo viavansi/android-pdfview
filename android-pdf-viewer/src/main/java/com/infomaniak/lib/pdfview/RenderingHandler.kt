@@ -18,6 +18,7 @@
 
 package com.infomaniak.lib.pdfview
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Rect
@@ -36,7 +37,8 @@ import com.infomaniak.lib.pdfview.model.PagePart
  * PDF is ready to render.
  */
 internal class RenderingHandler(
-    looper: Looper?, private val pdfView: PDFView
+    looper: Looper?,
+    private val pdfView: PDFView,
 ) : Handler(looper!!) {
     private val renderBounds = RectF()
     private val roundedRenderBounds = Rect()
