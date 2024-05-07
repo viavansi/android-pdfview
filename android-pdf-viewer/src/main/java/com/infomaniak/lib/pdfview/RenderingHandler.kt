@@ -18,7 +18,6 @@
 
 package com.infomaniak.lib.pdfview
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Rect

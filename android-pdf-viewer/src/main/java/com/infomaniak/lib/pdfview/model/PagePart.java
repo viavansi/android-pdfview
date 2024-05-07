@@ -43,6 +43,10 @@ public class PagePart {
         return cacheOrder;
     }
 
+    public void setCacheOrder(int cacheOrder) {
+        this.cacheOrder = cacheOrder;
+    }
+
     public int getPage() {
         return page;
     }
@@ -57,10 +61,6 @@ public class PagePart {
 
     public boolean isThumbnail() {
         return thumbnail;
-    }
-
-    public void setCacheOrder(int cacheOrder) {
-        this.cacheOrder = cacheOrder;
     }
 
     @Override

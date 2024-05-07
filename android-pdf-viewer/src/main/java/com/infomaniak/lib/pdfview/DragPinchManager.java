@@ -356,7 +356,8 @@ class DragPinchManager implements
             startingTouchYPosition = event.getY();
         }
 
-        boolean canScrollHorizontally = v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) && v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT);
+        boolean canScrollHorizontally =
+                v.canScrollHorizontally(DIRECTION_SCROLLING_LEFT) && v.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT);
         if (event.getAction() == MotionEvent.ACTION_MOVE && canScrollHorizontally) {
             startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
         }

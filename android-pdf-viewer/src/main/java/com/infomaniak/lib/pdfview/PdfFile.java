@@ -37,25 +37,45 @@ class PdfFile {
     private PdfDocument pdfDocument;
     private PdfiumCore pdfiumCore;
     private int pagesCount = 0;
-    /** Original page sizes */
+    /**
+     * Original page sizes
+     */
     private List<Size> originalPageSizes = new ArrayList<>();
-    /** Scaled page sizes */
+    /**
+     * Scaled page sizes
+     */
     private List<SizeF> pageSizes = new ArrayList<>();
-    /** Opened pages with indicator whether opening was successful */
+    /**
+     * Opened pages with indicator whether opening was successful
+     */
     private SparseBooleanArray openedPages = new SparseBooleanArray();
-    /** Page with maximum width */
+    /**
+     * Page with maximum width
+     */
     private Size originalMaxWidthPageSize = new Size(0, 0);
-    /** Page with maximum height */
+    /**
+     * Page with maximum height
+     */
     private Size originalMaxHeightPageSize = new Size(0, 0);
-    /** Scaled page with maximum height */
+    /**
+     * Scaled page with maximum height
+     */
     private SizeF maxHeightPageSize = new SizeF(0, 0);
-    /** Scaled page with maximum width */
+    /**
+     * Scaled page with maximum width
+     */
     private SizeF maxWidthPageSize = new SizeF(0, 0);
-    /** Calculated offsets for pages */
+    /**
+     * Calculated offsets for pages
+     */
     private List<Float> pageOffsets = new ArrayList<>();
-    /** Calculated auto spacing for pages */
+    /**
+     * Calculated auto spacing for pages
+     */
     private List<Float> pageSpacing = new ArrayList<>();
-    /** Calculated document length (width or height, depending on swipe mode) */
+    /**
+     * Calculated document length (width or height, depending on swipe mode)
+     */
     private float documentLength = 0;
 
     /**
@@ -184,7 +204,8 @@ class PdfFile {
                 length += displayOptions.getPdfSpacing().getPageSeparatorSpacing();
             }
         }
-        documentLength = length + displayOptions.getPdfSpacing().getStartSpacing() + displayOptions.getPdfSpacing().getEndSpacing();
+        documentLength =
+                length + displayOptions.getPdfSpacing().getStartSpacing() + displayOptions.getPdfSpacing().getEndSpacing();
     }
 
     private void preparePagesOffset() {
@@ -236,7 +257,9 @@ class PdfFile {
         return spacing * zoom;
     }
 
-    /** Get primary page offset, that is Y for vertical scroll and X for horizontal scroll */
+    /**
+     * Get primary page offset, that is Y for vertical scroll and X for horizontal scroll
+     */
     public float getPageOffset(int pageIndex, float zoom) {
         int docPage = documentPage(pageIndex);
         if (docPage < 0) {
@@ -245,7 +268,9 @@ class PdfFile {
         return pageOffsets.get(pageIndex) * zoom;
     }
 
-    /** Get secondary page offset, that is X for vertical scroll and Y for horizontal scroll */
+    /**
+     * Get secondary page offset, that is X for vertical scroll and Y for horizontal scroll
+     */
     public float getSecondaryPageOffset(int pageIndex, float zoom) {
         SizeF pageSize = getPageSize(pageIndex);
         if (displayOptions.isVertical()) {

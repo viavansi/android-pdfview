@@ -82,12 +82,16 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private void setHandleView() {
-        if (handleView != null) initViewWithCustomView(); else initDefaultView(handleBackgroundDrawable);
+        if (handleView != null) {
+            initViewWithCustomView();
+        } else {
+            initDefaultView(handleBackgroundDrawable);
+        }
 
         setVisibility(INVISIBLE);
         if (pageIndicator != null) {
             if (textColorResId != -1) pageIndicator.setTextColor(textColorResId);
-            if (textSize != -1)pageIndicator.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+            if (textSize != -1) pageIndicator.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
         }
     }
 
@@ -278,7 +282,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
      * Use a custom view as the handle. if you want to have the page indicator,
      * provide the pageIndicator parameter.
      *
-     * @param handleView view to set as the handle
+     * @param handleView    view to set as the handle
      * @param pageIndicator TextView to use as the page indicator
      */
     public void setPageHandleView(View handleView, TextView pageIndicator) {

@@ -125,12 +125,12 @@ public class Callbacks {
         }
     }
 
-    public void setOnError(OnErrorListener onErrorListener) {
-        this.onErrorListener = onErrorListener;
-    }
-
     public OnErrorListener getOnError() {
         return onErrorListener;
+    }
+
+    public void setOnError(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
     }
 
     public void setOnPageError(OnPageErrorListener onPageErrorListener) {
@@ -175,20 +175,20 @@ public class Callbacks {
         }
     }
 
-    public void setOnDraw(OnDrawListener onDrawListener) {
-        this.onDrawListener = onDrawListener;
-    }
-
     public OnDrawListener getOnDraw() {
         return onDrawListener;
     }
 
-    public void setOnDrawAll(OnDrawListener onDrawAllListener) {
-        this.onDrawAllListener = onDrawAllListener;
+    public void setOnDraw(OnDrawListener onDrawListener) {
+        this.onDrawListener = onDrawListener;
     }
 
     public OnDrawListener getOnDrawAll() {
         return onDrawAllListener;
+    }
+
+    public void setOnDrawAll(OnDrawListener onDrawAllListener) {
+        this.onDrawAllListener = onDrawAllListener;
     }
 
     public void setOnTap(OnTapListener onTapListener) {

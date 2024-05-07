@@ -17,7 +17,11 @@
  */
 package com.infomaniak.lib.pdfview;
 
+import static com.infomaniak.lib.pdfview.util.Constants.Cache.CACHE_SIZE;
+import static com.infomaniak.lib.pdfview.util.Constants.Cache.THUMBNAILS_CACHE_SIZE;
+
 import android.graphics.RectF;
+
 import androidx.annotation.Nullable;
 
 import com.infomaniak.lib.pdfview.model.PagePart;
@@ -27,9 +31,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-
-import static com.infomaniak.lib.pdfview.util.Constants.Cache.CACHE_SIZE;
-import static com.infomaniak.lib.pdfview.util.Constants.Cache.THUMBNAILS_CACHE_SIZE;
 
 class CacheManager {
 
@@ -47,6 +48,16 @@ class CacheManager {
         activeCache = new PriorityQueue<>(CACHE_SIZE, orderComparator);
         passiveCache = new PriorityQueue<>(CACHE_SIZE, orderComparator);
         thumbnails = new ArrayList<>();
+    }
+
+    @Nullable
+    private static PagePart find(PriorityQueue<PagePart> vector, PagePart fakePart) {
+        for (PagePart part : vector) {
+            if (part.equals(fakePart)) {
+                return part;
+            }
+        }
+        return null;
     }
 
     public void cachePart(PagePart part) {
@@ -139,16 +150,6 @@ class CacheManager {
             }
         }
         collection.add(newPart);
-    }
-
-    @Nullable
-    private static PagePart find(PriorityQueue<PagePart> vector, PagePart fakePart) {
-        for (PagePart part : vector) {
-            if (part.equals(fakePart)) {
-                return part;
-            }
-        }
-        return null;
     }
 
     public List<PagePart> getPageParts() {

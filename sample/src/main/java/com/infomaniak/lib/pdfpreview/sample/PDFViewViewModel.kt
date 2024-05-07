@@ -6,7 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.AndroidViewModel
 
-class PDFViewViewModel(appContext: Application): AndroidViewModel(appContext) {
+class PDFViewViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun getFileName(contentResolver: ContentResolver, uri: Uri?): String? {
         return uri?.let { fileUri ->

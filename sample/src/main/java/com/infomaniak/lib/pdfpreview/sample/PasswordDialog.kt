@@ -7,7 +7,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.lib.pdfview.sample.databinding.DialogPasswordBinding
 
-class PasswordDialog(private val onPasswordEntered: (String) -> Unit): DialogFragment() {
+class PasswordDialog(private val onPasswordEntered: (String) -> Unit) : DialogFragment() {
     private val binding by lazy {
         DialogPasswordBinding.inflate(LayoutInflater.from(context))
     }
@@ -17,8 +17,6 @@ class PasswordDialog(private val onPasswordEntered: (String) -> Unit): DialogFra
             onPasswordEntered.invoke(binding.passwordInputField.text.toString())
             dismiss()
         }
-        return MaterialAlertDialogBuilder(requireContext())
-            .setView(binding.root)
-            .create()
+        return MaterialAlertDialogBuilder(requireContext()).setView(binding.root).create()
     }
 }
