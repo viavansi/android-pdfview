@@ -813,7 +813,6 @@ public class PDFView extends RelativeLayout {
 
         // Restore the canvas position
         canvas.translate(-localTranslationX, -localTranslationY);
-
     }
 
     /**
