@@ -358,7 +358,7 @@ class PagesLoader {
                     pdfView.isAnnotationRendering(),
                     isForPrinting
             );
-        } else if (page == pdfView.getPageCount() - 1) {
+        } else if (page == pdfView.getPageCount() - 1 && isForPrinting) {
             pdfView.callbacks.callsOnReadyForPrinting(pdfView.getPagesAsBitmaps());
         }
     }
