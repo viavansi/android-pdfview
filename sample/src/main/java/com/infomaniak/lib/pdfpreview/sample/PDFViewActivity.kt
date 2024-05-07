@@ -53,25 +53,8 @@ class PDFViewActivity :
     OnPageChangeListener,
     OnLoadCompleteListener,
     OnPageErrorListener,
-    OnErrorListener,
+    OnErrorListener
 {
-
-    companion object {
-        private val TAG: String = PDFViewActivity::class.java.simpleName
-        private const val PERMISSION_CODE = 42042
-        private const val SAMPLE_FILE = "sample.pdf"
-        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
-        private const val HANDLE_WIDTH_DP = 65
-        private const val HANDLE_HEIGHT_DP = 40
-        private const val HANDLE_PADDING_TOP_DP = 40
-        private const val HANDLE_PADDING_BOTTOM_DP = 40
-        private const val PDF_PAGE_SPACING_DP = 10
-        private const val DEFAULT_TEXT_SIZE_DP = 16
-        private const val START_END_SPACING_DP = 200
-        private const val MIN_ZOOM = 0.93f
-        private const val MID_ZOOM = 3f
-        private const val MAX_ZOOM = 6f
-    }
 
     private var uri: Uri? = null
     private var pageNumber = 0
@@ -234,5 +217,22 @@ class PDFViewActivity :
         when (throwable) {
             is PdfPasswordException -> openPasswordDialog()
         }
+    }
+
+    companion object {
+        private val TAG: String = PDFViewActivity::class.java.simpleName
+        private const val PERMISSION_CODE = 42042
+        private const val SAMPLE_FILE = "sample.pdf"
+        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+        private const val HANDLE_WIDTH_DP = 65
+        private const val HANDLE_HEIGHT_DP = 40
+        private const val HANDLE_PADDING_TOP_DP = 40
+        private const val HANDLE_PADDING_BOTTOM_DP = 40
+        private const val PDF_PAGE_SPACING_DP = 10
+        private const val DEFAULT_TEXT_SIZE_DP = 16
+        private const val START_END_SPACING_DP = 200
+        private const val MIN_ZOOM = 0.93f
+        private const val MID_ZOOM = 3f
+        private const val MAX_ZOOM = 6f
     }
 }
