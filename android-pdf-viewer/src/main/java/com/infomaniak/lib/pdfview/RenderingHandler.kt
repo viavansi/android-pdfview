@@ -52,7 +52,7 @@ internal class RenderingHandler(
         cacheOrder: Int,
         bestQuality: Boolean,
         annotationRendering: Boolean,
-        isForPrinting: Boolean
+        isForPrinting: Boolean,
     ) {
         val task = RenderingTask(
             renderingSize,
@@ -61,7 +61,7 @@ internal class RenderingHandler(
             cacheOrder,
             bestQuality,
             annotationRendering,
-            isForPrinting
+            isForPrinting,
         )
         val msg = obtainMessage(MSG_RENDER_TASK, task)
         sendMessage(msg)

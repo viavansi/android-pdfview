@@ -53,7 +53,7 @@ class PDFViewActivity :
     OnPageChangeListener,
     OnLoadCompleteListener,
     OnPageErrorListener,
-    OnErrorListener
+    OnErrorListener,
 {
 
     companion object {
