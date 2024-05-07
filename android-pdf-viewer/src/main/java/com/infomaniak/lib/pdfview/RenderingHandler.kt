@@ -75,23 +75,18 @@ internal class RenderingHandler(
         running = true
     }
 
-    override fun handleMessage(message: Message) {
+    override fun handleMessage(message: Message): Unit = with(pdfView) {
         val task = message.obj as RenderingTask
-        try {
-            val part = proceed(task)
-            if (part != null) {
+        runCatching {
+            proceed(task)?.let { pagePart ->
                 if (running) {
-                    pdfView.post {
-                        pdfView.onBitmapRendered(
-                            part, task.isForPrinting
-                        )
-                    }
+                    post { onBitmapRendered(pagePart, task.isForPrinting) }
                 } else {
-                    part.renderedBitmap.recycle()
+                    pagePart.renderedBitmap.recycle()
                 }
             }
-        } catch (ex: PageRenderingException) {
-            pdfView.post { pdfView.onPageError(ex) }
+        }.onFailure { exception ->
+            if (exception is PageRenderingException) post { onPageError(exception) }
         }
     }
 
@@ -107,17 +102,18 @@ internal class RenderingHandler(
             return null
         }
 
-        val render: Bitmap
-        try {
-            render = Bitmap.createBitmap(
-                w,
-                h,
-                if (renderingTask.bestQuality) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
+        var render: Bitmap? = null
+        runCatching {
+            Bitmap.createBitmap(
+                w, h, if (renderingTask.bestQuality) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
             )
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Cannot create bitmap", e)
-            return null
+        }.onSuccess { renderedBitmap ->
+            render = renderedBitmap
+        }.onFailure {
+            Log.e(TAG, "Cannot create bitmap", it)
+            render = null
         }
+
         calculateBounds(w, h, renderingTask.renderingSize.bounds)
 
         pdfFile.renderPageBitmap(
