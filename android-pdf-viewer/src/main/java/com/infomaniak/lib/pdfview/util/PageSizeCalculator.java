@@ -19,20 +19,24 @@ import com.shockwave.pdfium.util.Size;
 import com.shockwave.pdfium.util.SizeF;
 
 public class PageSizeCalculator {
-    private FitPolicy fitPolicy;
+
     private final Size originalMaxWidthPageSize;
     private final Size originalMaxHeightPageSize;
     private final Size viewSize;
+    private FitPolicy fitPolicy;
     private SizeF optimalMaxWidthPageSize;
     private SizeF optimalMaxHeightPageSize;
     private float widthRatio;
     private float heightRatio;
     private boolean fitEachPage;
 
-    public PageSizeCalculator(FitPolicy fitPolicy,
-                              Size originalMaxWidthPageSize,
-                              Size originalMaxHeightPageSize,
-                              Size viewSize, boolean fitEachPage) {
+    public PageSizeCalculator(
+            FitPolicy fitPolicy,
+            Size originalMaxWidthPageSize,
+            Size originalMaxHeightPageSize,
+            Size viewSize,
+            boolean fitEachPage
+    ) {
         this.fitPolicy = fitPolicy;
         this.originalMaxWidthPageSize = originalMaxWidthPageSize;
         this.originalMaxHeightPageSize = originalMaxHeightPageSize;
@@ -75,10 +79,11 @@ public class PageSizeCalculator {
             case BOTH:
                 SizeF localOptimalMaxWidth = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(), viewSize.getHeight());
                 float localWidthRatio = localOptimalMaxWidth.getWidth() / originalMaxWidthPageSize.getWidth();
-                this.optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize, originalMaxHeightPageSize.getWidth() * localWidthRatio,
-                        viewSize.getHeight());
+                this.optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize,
+                        originalMaxHeightPageSize.getWidth() * localWidthRatio, viewSize.getHeight());
                 heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
-                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(), originalMaxWidthPageSize.getHeight() * heightRatio);
+                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(),
+                        originalMaxWidthPageSize.getHeight() * heightRatio);
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
                 break;
             default:

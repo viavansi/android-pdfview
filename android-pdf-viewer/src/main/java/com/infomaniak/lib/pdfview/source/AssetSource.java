@@ -15,7 +15,6 @@
  */
 package com.infomaniak.lib.pdfview.source;
 
-
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 

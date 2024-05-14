@@ -22,11 +22,11 @@ import static com.infomaniak.lib.pdfview.util.Constants.PRELOAD_OFFSET;
 
 import android.graphics.RectF;
 
+import com.infomaniak.lib.pdfview.RenderingHandler.RenderingSize;
 import com.infomaniak.lib.pdfview.util.Constants;
 import com.infomaniak.lib.pdfview.util.MathUtils;
 import com.infomaniak.lib.pdfview.util.Util;
 import com.shockwave.pdfium.util.SizeF;
-import com.infomaniak.lib.pdfview.RenderingHandler.RenderingSize;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,10 +50,7 @@ class PagesLoader {
 
         @Override
         public String toString() {
-            return "Holder{" +
-                    "row=" + row +
-                    ", col=" + col +
-                    '}';
+            return "Holder{row=" + row + ", col=" + col + '}';
         }
     }
 
@@ -87,10 +84,7 @@ class PagesLoader {
 
         @Override
         public String toString() {
-            return "GridSize{" +
-                    "rows=" + rows +
-                    ", cols=" + cols +
-                    '}';
+            return "GridSize{rows=" + rows + ", cols=" + cols + '}';
         }
     }
 
@@ -119,7 +113,6 @@ class PagesLoader {
         partRenderWidth = Constants.PART_SIZE / pageRelativePartWidth;
         partRenderHeight = Constants.PART_SIZE / pageRelativePartHeight;
     }
-
 
     /**
      * calculate the render range of each page
@@ -200,8 +193,7 @@ class PagesLoader {
             float rowHeight = scaledPageSize.getHeight() / range.gridSize.rows;
             float colWidth = scaledPageSize.getWidth() / range.gridSize.cols;
 
-
-            // get the page offset int the whole file
+            // Get the page offset int the whole file
             // ---------------------------------------
             // |            |           |            |
             // |<--offset-->|   (page)  |<--offset-->|
@@ -213,34 +205,26 @@ class PagesLoader {
             // calculate the row,col of the point in the leftTop and rightBottom
             if (pdfView.isSwipeVertical()) {
                 range.leftTop.row = MathUtils.floor(
-                        Math.abs(
-                                pageFirstYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
-                        ) / rowHeight
+                        Math.abs(pageFirstYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight
                 );
                 range.leftTop.col = MathUtils.floor(MathUtils.min(pageFirstXOffset - secondaryOffset, 0) / colWidth);
 
                 range.rightBottom.row = MathUtils.ceil(
-                        Math.abs(
-                                pageLastYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
-                        ) / rowHeight
+                        Math.abs(pageLastYOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / rowHeight
                 );
                 range.rightBottom.col = MathUtils.floor(
                         MathUtils.min(pageLastXOffset - secondaryOffset, 0) / colWidth
                 );
             } else {
                 range.leftTop.col = MathUtils.floor(
-                        Math.abs(
-                                pageFirstXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
-                        ) / colWidth
+                        Math.abs(pageFirstXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth
                 );
                 range.leftTop.row = MathUtils.floor(
                         MathUtils.min(pageFirstYOffset - secondaryOffset, 0) / rowHeight
                 );
 
                 range.rightBottom.col = MathUtils.floor(
-                        Math.abs(
-                                pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())
-                        ) / colWidth
+                        Math.abs(pageLastXOffset - pdfView.pdfFile.getPageOffset(range.page, pdfView.getZoom())) / colWidth
                 );
                 range.rightBottom.row = MathUtils.floor(
                         MathUtils.min(pageLastYOffset - secondaryOffset, 0) / rowHeight
@@ -289,8 +273,7 @@ class PagesLoader {
         }
     }
 
-    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol,
-                         int nbOfPartsLoadable) {
+    private int loadPage(int page, int firstRow, int lastRow, int firstCol, int lastCol, int nbOfPartsLoadable) {
         int loaded = 0;
         for (int row = firstRow; row <= lastRow; row++) {
             for (int col = firstCol; col <= lastCol; col++) {

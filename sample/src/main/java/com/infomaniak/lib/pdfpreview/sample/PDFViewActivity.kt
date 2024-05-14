@@ -24,11 +24,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -39,7 +39,6 @@ import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
 import com.infomaniak.lib.pdfview.listener.OnPageErrorListener
-import com.infomaniak.lib.pdfview.listener.OnReadyForPrintingListener
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -48,13 +47,7 @@ import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
-class PDFViewActivity :
-    AppCompatActivity(),
-    OnPageChangeListener,
-    OnLoadCompleteListener,
-    OnPageErrorListener,
-    OnErrorListener
-{
+class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener, OnErrorListener {
 
     private var uri: Uri? = null
     private var pageNumber = 0
@@ -65,34 +58,27 @@ class PDFViewActivity :
 
     private val pdfScrollHandle by lazy { getScrollHandle() }
 
-    private val selectFileResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
-            if (activityResult.resultCode == RESULT_OK) {
-                activityResult.data?.let { intent ->
-                    uri = intent.data
-                    displayFromUri(uri)
-                }
+    private val selectFileResult = registerForActivityResult(StartActivityForResult()) { activityResult ->
+        if (activityResult.resultCode == RESULT_OK) {
+            activityResult.data?.let { intent ->
+                uri = intent.data
+                displayFromUri(uri)
             }
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initializePDFView()
-        binding.selectFile.setOnClickListener {
-            pickFile()
-        }
+        binding.selectFile.setOnClickListener { pickFile() }
     }
 
     private fun pickFile() {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-            val permissionCheck = ContextCompat.checkSelfPermission(
-                this, READ_EXTERNAL_STORAGE
-            )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            val permissionCheck = ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE)
             if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(READ_EXTERNAL_STORAGE), PERMISSION_CODE
-                )
+                ActivityCompat.requestPermissions(this, arrayOf(READ_EXTERNAL_STORAGE), PERMISSION_CODE)
                 return
             }
         }
@@ -122,15 +108,13 @@ class PDFViewActivity :
     }
 
     @SuppressLint("InflateParams")
-    private fun getScrollHandle(): ScrollHandle {
-        return DefaultScrollHandle(this).apply {
-            val view = layoutInflater.inflate(R.layout.handle_background, null);
-            setPageHandleView(view, view.findViewById<TextView>(R.id.pageIndicator))
-            setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
-            setTextSize(DEFAULT_TEXT_SIZE_DP)
-            setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
-            setHandlePaddings(0, HANDLE_PADDING_TOP_DP, 0, HANDLE_PADDING_BOTTOM_DP)
-        }
+    private fun getScrollHandle(): ScrollHandle = DefaultScrollHandle(this).apply {
+        val view = layoutInflater.inflate(R.layout.handle_background, null);
+        setPageHandleView(view, view.findViewById(R.id.pageIndicator))
+        setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null))
+        setTextSize(DEFAULT_TEXT_SIZE_DP)
+        setHandleSize(HANDLE_WIDTH_DP, HANDLE_HEIGHT_DP)
+        setHandlePaddings(0, HANDLE_PADDING_TOP_DP, 0, HANDLE_PADDING_BOTTOM_DP)
     }
 
     private fun displayFromAsset(password: String? = null) {
@@ -159,17 +143,15 @@ class PDFViewActivity :
     }
 
     private fun openPasswordDialog() {
-        PasswordDialog(onPasswordEntered = { password ->
-            displayFromUri(uri, password)
-        }).also { it.show(supportFragmentManager, "TAG") }
+        PasswordDialog(
+            onPasswordEntered = { password -> displayFromUri(uri, password) },
+        ).also { it.show(supportFragmentManager, "TAG") }
     }
 
     private fun printBookmarksTree(bookmarks: List<PdfDocument.Bookmark>, sep: String) {
         for (bookmark in bookmarks) {
             Log.e(TAG, String.format("%s %s, p %d", sep, bookmark.title, bookmark.pageIdx))
-            if (bookmark.hasChildren()) {
-                printBookmarksTree(bookmark.children, "$sep-")
-            }
+            if (bookmark.hasChildren()) printBookmarksTree(bookmark.children, "$sep-")
         }
     }
 
@@ -201,12 +183,10 @@ class PDFViewActivity :
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_CODE
-            && grantResults.isNotEmpty()
-            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             launchPicker()
         }
     }
@@ -234,7 +214,7 @@ class PDFViewActivity :
         private const val DEFAULT_TEXT_SIZE_DP = 16
         private const val START_END_SPACING_DP = 200
         private const val MIN_ZOOM = 0.93f
-        private const val MID_ZOOM = 3f
-        private const val MAX_ZOOM = 6f
+        private const val MID_ZOOM = 3.0f
+        private const val MAX_ZOOM = 6.0f
     }
 }

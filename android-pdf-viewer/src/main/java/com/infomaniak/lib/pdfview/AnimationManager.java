@@ -24,7 +24,6 @@ import android.graphics.PointF;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.OverScroller;
 
-
 /**
  * This manager is used by the PDFView to launch animations.
  * It uses the ValueAnimator appeared in API 11 to start
@@ -81,7 +80,16 @@ class AnimationManager {
         animation.start();
     }
 
-    public void startFlingAnimation(int startX, int startY, int velocityX, int velocityY, int minX, int maxX, int minY, int maxY) {
+    public void startFlingAnimation(
+            int startX,
+            int startY,
+            int velocityX,
+            int velocityY,
+            int minX,
+            int maxX,
+            int minY,
+            int maxY
+    ) {
         stopAll();
         flinging = true;
         scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY);
@@ -123,6 +131,12 @@ class AnimationManager {
 
     public boolean isFlinging() {
         return flinging || pageFlinging;
+    }
+
+    private void hideHandle() {
+        if (pdfView.getScrollHandle() != null) {
+            pdfView.getScrollHandle().hideDelayed();
+        }
     }
 
     class XAnimation extends AnimatorListenerAdapter implements AnimatorUpdateListener {
@@ -209,13 +223,5 @@ class AnimationManager {
         @Override
         public void onAnimationStart(Animator animation) {
         }
-
     }
-
-    private void hideHandle() {
-        if (pdfView.getScrollHandle() != null) {
-            pdfView.getScrollHandle().hideDelayed();
-        }
-    }
-
 }
