@@ -81,8 +81,14 @@ class AnimationManager {
     }
 
     public void startFlingAnimation(
-            int startX, int startY, int velocityX, int velocityY,
-            int minX, int maxX, int minY, int maxY
+            int startX,
+            int startY,
+            int velocityX,
+            int velocityY,
+            int minX,
+            int maxX,
+            int minY,
+            int maxY
     ) {
         stopAll();
         flinging = true;
