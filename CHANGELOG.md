@@ -1,3 +1,7 @@
+## 3.2.9 (2024-05-14)
+* Add loadPagesForPrinting method on PDFView to start generating bitmaps for printing
+* Add OnReadyForPrintingListener listener to know when bitmaps are ready
+
 ## 3.2.8 (2024-01-09)
 * Add the possibility to have space above the first page and below the last page of the PDF
 * Change the default min, mid, max zoom value
