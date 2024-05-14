@@ -102,10 +102,12 @@ class PDFViewActivity :
     private fun launchPicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "application/pdf"
-        try {
+        runCatching {
             selectFileResult.launch(intent)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show()
+        }.onFailure { exception ->
+            if (exception is ActivityNotFoundException) {
+                Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
