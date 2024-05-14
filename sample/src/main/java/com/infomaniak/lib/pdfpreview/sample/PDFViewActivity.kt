@@ -1,3 +1,21 @@
+/*
+ * Infomaniak android-pdf-viewer
+ * Copyright (C) 2024 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.infomaniak.lib.pdfpreview.sample
 
 import android.annotation.SuppressLint
@@ -21,6 +39,7 @@ import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
 import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
 import com.infomaniak.lib.pdfview.listener.OnPageErrorListener
+import com.infomaniak.lib.pdfview.listener.OnReadyForPrintingListener
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -29,25 +48,13 @@ import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
-class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompleteListener,
-    OnPageErrorListener, OnErrorListener {
-
-    companion object {
-        private val TAG: String = PDFViewActivity::class.java.simpleName
-        private const val PERMISSION_CODE = 42042
-        private const val SAMPLE_FILE = "sample.pdf"
-        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
-        private const val HANDLE_WIDTH_DP = 65
-        private const val HANDLE_HEIGHT_DP = 40
-        private const val HANDLE_PADDING_TOP_DP = 40
-        private const val HANDLE_PADDING_BOTTOM_DP = 40
-        private const val PDF_PAGE_SPACING_DP = 10
-        private const val DEFAULT_TEXT_SIZE_DP = 16
-        private const val START_END_SPACING_DP = 200
-        private const val MIN_ZOOM = 0.93f
-        private const val MID_ZOOM = 3f
-        private const val MAX_ZOOM = 6f
-    }
+class PDFViewActivity :
+    AppCompatActivity(),
+    OnPageChangeListener,
+    OnLoadCompleteListener,
+    OnPageErrorListener,
+    OnErrorListener
+{
 
     private var uri: Uri? = null
     private var pageNumber = 0
@@ -95,10 +102,12 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     private fun launchPicker() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "application/pdf"
-        try {
+        runCatching {
             selectFileResult.launch(intent)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show()
+        }.onFailure { exception ->
+            if (exception is ActivityNotFoundException) {
+                Toast.makeText(this, R.string.toast_pick_file_error, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -210,5 +219,22 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         when (throwable) {
             is PdfPasswordException -> openPasswordDialog()
         }
+    }
+
+    companion object {
+        private val TAG: String = PDFViewActivity::class.java.simpleName
+        private const val PERMISSION_CODE = 42042
+        private const val SAMPLE_FILE = "sample.pdf"
+        private const val READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE"
+        private const val HANDLE_WIDTH_DP = 65
+        private const val HANDLE_HEIGHT_DP = 40
+        private const val HANDLE_PADDING_TOP_DP = 40
+        private const val HANDLE_PADDING_BOTTOM_DP = 40
+        private const val PDF_PAGE_SPACING_DP = 10
+        private const val DEFAULT_TEXT_SIZE_DP = 16
+        private const val START_END_SPACING_DP = 200
+        private const val MIN_ZOOM = 0.93f
+        private const val MID_ZOOM = 3f
+        private const val MAX_ZOOM = 6f
     }
 }
