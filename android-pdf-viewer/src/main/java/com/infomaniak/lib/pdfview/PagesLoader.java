@@ -328,7 +328,7 @@ class PagesLoader {
 
     private void loadThumbnail(int page, boolean isForPrinting) {
         SizeF pageSize = pdfView.pdfFile.getPageSize(page);
-        float thumbnailRatio = isForPrinting ? Constants.THUMBNAIL_RATIO_PRINTING : Constants.THUMBNAIL_RATIO;
+        float thumbnailRatio = isForPrinting ? Constants.THUMBNAIL_RATIO_PRINTING : pdfView.getThumbnailRatio();
         float thumbnailWidth = pageSize.getWidth() * thumbnailRatio;
         float thumbnailHeight = pageSize.getHeight() * thumbnailRatio;
         if (!pdfView.cacheManager.containsThumbnail(page, thumbnailRect)) {

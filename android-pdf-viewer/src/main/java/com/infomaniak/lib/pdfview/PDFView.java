@@ -40,6 +40,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.FloatRange;
+
 import com.infomaniak.lib.pdfview.exception.PageRenderingException;
 import com.infomaniak.lib.pdfview.link.DefaultLinkHandler;
 import com.infomaniak.lib.pdfview.link.LinkHandler;
@@ -240,6 +242,13 @@ public class PDFView extends RelativeLayout {
      * False if bitmap should be compressed by using RGB_565 format and take less memory
      */
     private boolean bestQuality = false;
+
+    /**
+     * Thumbnail ratio (subpart of the PDF)
+     * Between 0 and 1 where 1 is the best quality possible but it'll take more memory to render the PDF
+     * Throw an exception if the value is 0
+     */
+    private float thumbnailRatio = Constants.THUMBNAIL_RATIO;
 
     /**
      * True if annotations should be rendered
@@ -1300,6 +1309,15 @@ public class PDFView extends RelativeLayout {
         return bestQuality;
     }
 
+    public void setThumbnailRatio(float thumbnailRatio) {
+        if (thumbnailRatio == 0) throw new IllegalArgumentException("thumbnailRatio must be greater than 0");
+        this.thumbnailRatio = thumbnailRatio;
+    }
+
+    public float getThumbnailRatio() {
+        return thumbnailRatio;
+    }
+
     public boolean isSwipeVertical() {
         return swipeVertical;
     }
@@ -1528,6 +1546,8 @@ public class PDFView extends RelativeLayout {
 
         private boolean nightMode = false;
         private boolean touchPriority = false;
+        private boolean useBestQuality = false;
+        private float thumbnailRatio = Constants.THUMBNAIL_RATIO;
 
         private Configurator(DocumentSource documentSource) {
             this.documentSource = documentSource;
@@ -1706,6 +1726,21 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
+        /**
+         * By default, generated bitmaps are compressed with {@link Bitmap.Config#RGB_565} format to reduce memory consumption.
+         * If {@link #useBestQuality} is true, rendering will be done with {@link Bitmap.Config#ARGB_8888}.
+         * @param useBestQuality true to use {@link Bitmap.Config#ARGB_8888}, false for {@link Bitmap.Config#RGB_565}
+         */
+        public Configurator useBestQuality(boolean useBestQuality) {
+            this.useBestQuality = useBestQuality;
+            return this;
+        }
+
+        public Configurator thumbnailRatio(@FloatRange(from = 0.1, to = 1.0) float thumbnailRatio) {
+            this.thumbnailRatio = thumbnailRatio;
+            return this;
+        }
+
         public void load() {
             if (!hasSize) {
                 waitingDocumentConfigurator = this;
@@ -1743,6 +1778,8 @@ public class PDFView extends RelativeLayout {
             PDFView.this.setMinZoom(minZoom);
             PDFView.this.setMidZoom(midZoom);
             PDFView.this.setMaxZoom(maxZoom);
+            PDFView.this.useBestQuality(useBestQuality);
+            PDFView.this.setThumbnailRatio(thumbnailRatio);
             setPageSeparatorSpacing(pageSeparatorSpacing);
             setStartSpacing(startSpacing);
             setEndSpacing(endSpacing);
