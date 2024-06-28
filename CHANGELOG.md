@@ -1,3 +1,9 @@
+## 3.2.10 (2024-06-28)
+* Add setThumbnailRatio to change the render quality of thumbnails
+* Update kotlin version to 2.0.0
+* Update gradle to 8.8
+* Upgrade AGP to 8.5.0
+
 ## 3.2.9 (2024-05-14)
 * Add loadPagesForPrinting method on PDFView to start generating bitmaps for printing
 * Add OnReadyForPrintingListener listener to know when bitmaps are ready
