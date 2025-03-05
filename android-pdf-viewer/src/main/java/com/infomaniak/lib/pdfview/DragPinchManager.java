@@ -368,8 +368,12 @@ class DragPinchManager implements
                 (!canScrollRight && scrollDirection == DIRECTION_SCROLLING_LEFT)
                         || (!canScrollLeft && scrollDirection == DIRECTION_SCROLLING_RIGHT);
 
-        if (event.getAction() == MotionEvent.ACTION_MOVE && canScrollHorizontally) {
-            startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (canScrollHorizontally) {
+                startingTouchXPosition = STARTING_TOUCH_POSITION_NOT_INITIALIZED;
+            } else if (startingTouchXPosition == STARTING_TOUCH_POSITION_NOT_INITIALIZED) {
+                startingTouchXPosition = event.getX();
+            }
         }
 
         if (!isScrollingBlocked || startingTouchXPosition == STARTING_TOUCH_POSITION_NOT_INITIALIZED) {

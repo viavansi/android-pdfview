@@ -106,13 +106,25 @@ class AnimationManager {
 
     void computeFling() {
         if (scroller.computeScrollOffset()) {
-            pdfView.moveTo(scroller.getCurrX(), scroller.getCurrY());
-            pdfView.loadPageByOffset();
+            if (shouldHandleScrollerValue()) {
+                pdfView.moveTo(scroller.getCurrX(), scroller.getCurrY());
+                pdfView.loadPageByOffset();
+            }
         } else if (flinging) { // fling finished
             flinging = false;
             pdfView.loadPages();
             hideHandle();
             pdfView.performPageSnap();
+        }
+    }
+
+    private boolean shouldHandleScrollerValue() {
+        // Sometimes, when we reach the end of the PDF and we perform a scroll, the scroller sometimes return 0 when we
+        // release the touch.
+        if (pdfView.isSwipeVertical()) {
+            return scroller.getCurrY() != 0 && scroller.getCurrY() != pdfView.getDocumentLength();
+        } else {
+            return scroller.getCurrX() != 0;
         }
     }
 
