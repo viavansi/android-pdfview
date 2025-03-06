@@ -124,7 +124,7 @@ class AnimationManager {
         if (pdfView.isSwipeVertical()) {
             return scroller.getCurrY() != 0 && scroller.getCurrY() != pdfView.getDocumentLength();
         } else {
-            return scroller.getCurrX() != 0;
+            return scroller.getCurrX() != 0 && scroller.getCurrX() != pdfView.getDocumentLength();
         }
     }
 
