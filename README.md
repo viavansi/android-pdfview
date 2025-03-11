@@ -2,7 +2,6 @@
 #### This is a fork of the [AndroidPdfViewer](https://github.com/mhiew/AndroidPdfViewer)
 switch back to the mainline repo when it gets migrated off JCenter
 
-
 # Android PdfViewer
 
 __AndroidPdfViewer 1.x is available on [AndroidPdfViewerV1](https://github.com/barteksc/AndroidPdfViewerV1)
@@ -29,8 +28,8 @@ allprojects {
 }
 ```
 
-`implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.3'`
-
+`implementation 'com.github.Infomaniak:android-pdfview:3.2.11`
+ 
 ## ProGuard
 If you are using ProGuard, add following rule to proguard config file:
 
@@ -66,26 +65,22 @@ pdfView.fromAsset(String)
     .enableSwipe(true) // allows to block changing pages using swipe
     .swipeHorizontal(false)
     .enableDoubletap(true)
-    .defaultPage(0)
-    // allows to draw something on the current page, usually visible in the middle of the screen
-    .onDraw(onDrawListener)
-    // allows to draw something on all pages, separately for every page. Called only for visible pages
-    .onDrawAll(onDrawListener)
-    .onLoad(onLoadCompleteListener) // called after document is loaded and starts to be rendered
+    .defaultPage(0) // allows to draw something on the current page, usually visible in the middle of the screen
+    .onDraw(onDrawListener) // allows to draw something on all pages, separately for every page. Called only for visible pages
+    .onDrawAll(onDrawListener) // called after document is loaded and starts to be rendered
+    .onLoad(onLoadCompleteListener)
     .onPageChange(onPageChangeListener)
     .onPageScroll(onPageScrollListener)
     .onError(onErrorListener)
-    .onPageError(onPageErrorListener)
-    .onRender(onRenderListener) // called after document is rendered for the first time
-    // called on single tap, return true if handled, false to toggle scroll handle visibility
+    .onPageError(onPageErrorListener) // called after document is rendered for the first time
+    .onRender(onRenderListener) // called on single tap, return true if handled, false to toggle scroll handle visibility
     .onTap(onTapListener)
     .onLongPress(onLongPressListener)
     .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
     .password(null)
-    .scrollHandle(null)
-    .enableAntialiasing(true) // improve rendering a little bit on low-res screens
-    // spacing between pages in dp. To define spacing color, set view background
-    .spacing(0)
+    .scrollHandle(null) // improve rendering a little bit on low-res screens
+    .enableAntialiasing(true) // spacing between pages in dp. To define spacing color, set view background
+    .pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
     .autoSpacing(false) // add dynamic spacing to fit each page on its own on the screen
     .linkHandler(DefaultLinkHandler)
     .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
@@ -97,6 +92,13 @@ pdfView.fromAsset(String)
 ```
 
 * `pages` is optional, it allows you to filter and order the pages of the PDF as you need
+
+## Touch conflicts
+
+If you're using `PDFView` inside a `ViewPager`, make sure to enable `touchPriority(true)` when initializing PDFView.
+This ensures that `PDFView` has touch priority, allowing users to zoom and navigate within the document. However, if the user
+swipes and reaches the edge of the `PDFView`, the touch control is returned to the `ViewPager`, enabling seamless page
+transitions.
 
 ## Scroll handle
 
