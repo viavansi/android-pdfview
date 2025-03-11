@@ -1,3 +1,8 @@
+## 3.2.11 (2025-03-11)
+* Fix issues when swiping PDfs in a ViewPager
+* Convert build.gradle to kts and use version catalog
+* Update libs
+
 ## 3.2.10 (2024-06-28)
 * Add setThumbnailRatio to change the render quality of thumbnails
 * Update kotlin version to 2.0.0
