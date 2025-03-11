@@ -383,7 +383,7 @@ public class PDFView extends RelativeLayout {
         }
 
         page = pdfFile.determineValidPageNumberFrom(page);
-        float offset = -pdfFile.getPageOffset(page, zoom) + pageSeparatorSpacing;
+        float offset = -pdfFile.getPageOffset(page, zoom) + pageSeparatorSpacing + startSpacing;
         if (swipeVertical) {
             if (withAnimation) {
                 animationManager.startYAnimation(currentYOffset, offset);
@@ -719,14 +719,11 @@ public class PDFView extends RelativeLayout {
         }
 
         // Moves the canvas before drawing any element
-        float currentXOffset = this.currentXOffset;
-        float currentYOffset = this.currentYOffset;
         canvas.translate(currentXOffset, currentYOffset);
 
         // Draws thumbnails
         for (PagePart part : cacheManager.getThumbnails()) {
             drawPart(canvas, part);
-
         }
 
         // Draws parts
@@ -970,11 +967,11 @@ public class PDFView extends RelativeLayout {
             if (contentHeight < getHeight()) { // whole document height visible on screen
                 offsetY = (getHeight() - contentHeight) / 2;
             } else {
-                float maxOffsetY = toCurrentScale((verticalBorder * 2f) - startSpacing);
+                float maxOffsetY = toCurrentScale(verticalBorder * 2f);
                 if (offsetY > maxOffsetY) { // top visible
                     offsetY = maxOffsetY;
-                } else if (offsetY + contentHeight + toCurrentScale((verticalBorder * 2f)) < getHeight() + toCurrentScale(endSpacing)) { // bottom visible
-                    offsetY = -contentHeight + getHeight() + toCurrentScale(endSpacing - (verticalBorder * 2f));
+                } else if (offsetY < getMinOffsetY()) { // bottom visible
+                    offsetY = getMinOffsetY();
                 }
             }
 
@@ -1003,11 +1000,11 @@ public class PDFView extends RelativeLayout {
             if (contentWidth < getWidth()) { // whole document width visible on screen
                 offsetX = (getWidth() - contentWidth) / 2f;
             } else {
-                float maxOffsetX = toCurrentScale((horizontalBorder * 2f) - startSpacing);
+                float maxOffsetX = toCurrentScale(horizontalBorder * 2f);
                 if (offsetX > maxOffsetX) { // left visible
                     offsetX = maxOffsetX;
-                } else if (offsetX + contentWidth + toCurrentScale((horizontalBorder * 2f)) < getWidth()  + toCurrentScale(endSpacing)) { // right visible
-                    offsetX = -contentWidth + getWidth() + toCurrentScale(endSpacing - (horizontalBorder * 2f));
+                } else if (offsetX < getMinOffsetX()) { // right visible
+                    offsetX = getMinOffsetX();
                 }
             }
 
@@ -1053,6 +1050,22 @@ public class PDFView extends RelativeLayout {
             showPage(page);
         } else {
             loadPages();
+        }
+    }
+
+    private float getMinOffsetX() {
+        return getWidth() - toCurrentScale(endSpacing) - toCurrentScale(horizontalBorder * 2f) - pdfFile.getDocLen(zoom);
+    }
+
+    private float getMinOffsetY() {
+        return getHeight() - toCurrentScale(endSpacing) - toCurrentScale(verticalBorder * 2f) - pdfFile.getDocLen(zoom);
+    }
+
+    public int getDocumentLength() {
+        if (swipeVertical) {
+            return (int) (getHeight() - pdfFile.getDocLen(zoom));
+        } else {
+            return (int) (getWidth() - pdfFile.getDocLen(zoom));
         }
     }
 
