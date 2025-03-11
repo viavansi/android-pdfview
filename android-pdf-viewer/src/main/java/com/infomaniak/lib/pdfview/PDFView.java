@@ -967,7 +967,7 @@ public class PDFView extends RelativeLayout {
             if (contentHeight < getHeight()) { // whole document height visible on screen
                 offsetY = (getHeight() - contentHeight) / 2;
             } else {
-                float maxOffsetY = toCurrentScale((verticalBorder * 2f) + startSpacing);
+                float maxOffsetY = toCurrentScale(verticalBorder * 2f);
                 if (offsetY > maxOffsetY) { // top visible
                     offsetY = maxOffsetY;
                 } else if (offsetY < getMinOffsetY()) { // bottom visible
@@ -1000,7 +1000,7 @@ public class PDFView extends RelativeLayout {
             if (contentWidth < getWidth()) { // whole document width visible on screen
                 offsetX = (getWidth() - contentWidth) / 2f;
             } else {
-                float maxOffsetX = toCurrentScale((horizontalBorder * 2f) + startSpacing);
+                float maxOffsetX = toCurrentScale(horizontalBorder * 2f);
                 if (offsetX > maxOffsetX) { // left visible
                     offsetX = maxOffsetX;
                 } else if (offsetX < getMinOffsetX()) { // right visible
