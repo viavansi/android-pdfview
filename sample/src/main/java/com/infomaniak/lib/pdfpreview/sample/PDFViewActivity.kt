@@ -46,7 +46,7 @@ import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
-class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnTapListener, OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener, OnErrorListener {
+class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapListener, OnTapListener, OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener, OnErrorListener {
 
     private var uri: Uri? = null
     private var pageNumber = 0
@@ -131,7 +131,9 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnTapListener,
             .onPageChange(this)
             .onTap(this)
             .onLongPress(this)
+            .onDoubleTap(this)
             .enableAnnotationRendering(true)
+            .enableDoubletapZoom(false)
             .onLoad(this)
             .scrollHandle(pdfScrollHandle)
             .pageSeparatorSpacing(PDF_PAGE_SPACING_DP)
@@ -232,6 +234,15 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnTapListener,
             val pdfPoint: PointF = binding.pdfView.convertCoords(e)
             val page: Int = binding.pdfView.pageForCoords(e)
             Log.d("PDF Debug: Tap", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+        }
+        return true
+    }
+
+    override fun onDoubleTap(e: MotionEvent?): Boolean {
+        if (e != null) {
+            val pdfPoint: PointF = binding.pdfView.convertCoords(e)
+            val page: Int = binding.pdfView.pageForCoords(e)
+            Log.d("PDF Debug: DoubleTap", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
         }
         return true
     }

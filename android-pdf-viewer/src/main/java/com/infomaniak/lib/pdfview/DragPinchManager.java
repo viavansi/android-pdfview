@@ -167,18 +167,18 @@ class DragPinchManager implements
 
     @Override
     public boolean onDoubleTap(@NonNull MotionEvent e) {
-        if (!pdfView.isDoubleTapEnabled()) {
-            return false;
-        }
-
-        if (pdfView.getZoom() < pdfView.getMidZoom()) {
-            pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
-        } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
-            pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMaxZoom());
+        if (pdfView.isDoubleTapZoomEnabled()) {
+            if (pdfView.getZoom() < pdfView.getMidZoom()) {
+                pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
+            } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
+                pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMaxZoom());
+            } else {
+                pdfView.resetZoomWithAnimation();
+            }
+            return true;
         } else {
-            pdfView.resetZoomWithAnimation();
+            return pdfView.callbacks.callOnDoubleTap(e);
         }
-        return true;
     }
 
     @Override

@@ -76,6 +76,11 @@ public class Callbacks {
     private OnTapListener onTapListener;
 
     /**
+     * Call back object to call when the user does a double tap gesture
+     */
+    private OnDoubleTapListener onDoubleTapListener;
+
+    /**
      * Call back object to call when the user does a long tap gesture
      */
     private OnLongPressListener onLongPressListener;
@@ -199,6 +204,14 @@ public class Callbacks {
         return onTapListener != null && onTapListener.onTap(event);
     }
 
+    public void setOnDoubleTap(OnDoubleTapListener onDoubleTapListener) {
+        this.onDoubleTapListener = onDoubleTapListener;
+    }
+
+    public boolean callOnDoubleTap(MotionEvent event) {
+        return onDoubleTapListener != null && onDoubleTapListener.onDoubleTap(event);
+    }
+
     public void setOnLongPress(OnLongPressListener onLongPressListener) {
         this.onLongPressListener = onLongPressListener;
     }
@@ -230,6 +243,7 @@ public class Callbacks {
         onDrawListener = null;
         onDrawAllListener = null;
         onTapListener = null;
+        onDoubleTapListener = null;
         onLongPressListener = null;
         linkHandler = null;
     }

@@ -49,6 +49,7 @@ import com.infomaniak.lib.pdfview.link.LinkHandler;
 import com.infomaniak.lib.pdfview.listener.Callbacks;
 import com.infomaniak.lib.pdfview.listener.OnAttachCompleteListener;
 import com.infomaniak.lib.pdfview.listener.OnDetachCompleteListener;
+import com.infomaniak.lib.pdfview.listener.OnDoubleTapListener;
 import com.infomaniak.lib.pdfview.listener.OnDrawListener;
 import com.infomaniak.lib.pdfview.listener.OnErrorListener;
 import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener;
@@ -219,7 +220,7 @@ public class PDFView extends RelativeLayout {
 
     private boolean enableSwipe = true;
 
-    private boolean doubleTapEnabled = true;
+    private boolean doubleTapZoomEnabled = true;
 
     private boolean nightMode = false;
 
@@ -494,12 +495,12 @@ public class PDFView extends RelativeLayout {
         }
     }
 
-    void enableDoubleTap(boolean enableDoubleTap) {
-        this.doubleTapEnabled = enableDoubleTap;
+    void enableDoubleTapZoom(boolean enableDoubleTapZoom) {
+        this.doubleTapZoomEnabled = enableDoubleTapZoom;
     }
 
-    boolean isDoubleTapEnabled() {
-        return doubleTapEnabled;
+    boolean isDoubleTapZoomEnabled() {
+        return doubleTapZoomEnabled;
     }
 
     void onPageError(PageRenderingException ex) {
@@ -1558,7 +1559,7 @@ public class PDFView extends RelativeLayout {
 
         private boolean enableSwipe = true;
 
-        private boolean enableDoubletap = true;
+        private boolean enableDoubletapZoom = true;
 
         private OnDrawListener onDrawListener;
 
@@ -1578,6 +1579,8 @@ public class PDFView extends RelativeLayout {
         private OnRenderListener onRenderListener;
 
         private OnTapListener onTapListener;
+
+        private OnDoubleTapListener onDoubleTapListener;
 
         private OnLongPressListener onLongPressListener;
 
@@ -1635,8 +1638,8 @@ public class PDFView extends RelativeLayout {
             return this;
         }
 
-        public Configurator enableDoubletap(boolean enableDoubletap) {
-            this.enableDoubletap = enableDoubletap;
+        public Configurator enableDoubletapZoom(boolean enableDoubletapZoom) {
+            this.enableDoubletapZoom = enableDoubletapZoom;
             return this;
         }
 
@@ -1702,6 +1705,11 @@ public class PDFView extends RelativeLayout {
 
         public Configurator onTap(OnTapListener onTapListener) {
             this.onTapListener = onTapListener;
+            return this;
+        }
+
+        public Configurator onDoubleTap(OnDoubleTapListener onDoubleTapListener) {
+            this.onDoubleTapListener = onDoubleTapListener;
             return this;
         }
 
@@ -1845,12 +1853,13 @@ public class PDFView extends RelativeLayout {
             PDFView.this.callbacks.setOnPageScroll(onPageScrollListener);
             PDFView.this.callbacks.setOnRender(onRenderListener);
             PDFView.this.callbacks.setOnTap(onTapListener);
+            PDFView.this.callbacks.setOnDoubleTap(onDoubleTapListener);
             PDFView.this.callbacks.setOnLongPress(onLongPressListener);
             PDFView.this.callbacks.setOnPageError(onPageErrorListener);
             PDFView.this.callbacks.setLinkHandler(linkHandler);
             PDFView.this.setSwipeEnabled(enableSwipe);
             PDFView.this.setNightMode(nightMode);
-            PDFView.this.enableDoubleTap(enableDoubletap);
+            PDFView.this.enableDoubleTapZoom(enableDoubletapZoom);
             PDFView.this.setDefaultPage(defaultPage);
             PDFView.this.setSwipeVertical(!swipeHorizontal);
             PDFView.this.enableAnnotationRendering(annotationRendering);
