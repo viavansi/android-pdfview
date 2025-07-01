@@ -1245,9 +1245,15 @@ public class PDFView extends RelativeLayout {
         return pdfFile.getPageSize(pageIndex);
     }
 
+    public int pageForCoords(MotionEvent e) {
+        float mappedX = -getCurrentXOffset()+e.getX();
+        float mappedY = -getCurrentYOffset()+e.getY();
+        return pdfFile.getPageAtOffset( isSwipeVertical() ? mappedY : mappedX, getZoom());
+    }
+
     public PointF convertCoords(MotionEvent e) {
-        float mappedX = getCurrentXOffset()+e.getX();
-        float mappedY = getCurrentYOffset()+e.getY();
+        float mappedX = -getCurrentXOffset()+e.getX();
+        float mappedY = -getCurrentYOffset()+e.getY();
         int page = pdfFile.getPageAtOffset( isSwipeVertical() ? mappedY : mappedX, getZoom());
         SizeF pageSize = pdfFile.getScaledPageSize(page, getZoom());
         float pageX, pageY;

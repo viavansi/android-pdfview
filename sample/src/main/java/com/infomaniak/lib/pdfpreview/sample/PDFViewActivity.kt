@@ -221,16 +221,18 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnTapListener,
 
     override fun onLongPress(e: MotionEvent?) {
         if (e != null) {
-            val pdfPoint: PointF = binding.pdfView.convertCoords(e);
-            Log.d("PDF: LongPress", "("+pdfPoint.x+", "+pdfPoint.y+")")
-        };
+            val pdfPoint: PointF = binding.pdfView.convertCoords(e)
+            val page: Int = binding.pdfView.pageForCoords(e)
+            Log.d("PDF Debug: LongPress", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+        }
     }
 
     override fun onTap(e: MotionEvent?): Boolean {
         if (e != null) {
-            val pdfPoint: PointF = binding.pdfView.convertCoords(e);
-            Log.d("PDF: Tap", "("+pdfPoint.x+", "+pdfPoint.y+")")
-        };
+            val pdfPoint: PointF = binding.pdfView.convertCoords(e)
+            val page: Int = binding.pdfView.pageForCoords(e)
+            Log.d("PDF Debug: Tap", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+        }
         return true
     }
 }
