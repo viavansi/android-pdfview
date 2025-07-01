@@ -23,10 +23,12 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.PointF
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -35,10 +37,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.infomaniak.lib.pdfview.PDFView.Configurator
-import com.infomaniak.lib.pdfview.listener.OnErrorListener
-import com.infomaniak.lib.pdfview.listener.OnLoadCompleteListener
-import com.infomaniak.lib.pdfview.listener.OnPageChangeListener
-import com.infomaniak.lib.pdfview.listener.OnPageErrorListener
+import com.infomaniak.lib.pdfview.listener.*
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -47,7 +46,7 @@ import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
-class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener, OnErrorListener {
+class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnTapListener, OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener, OnErrorListener {
 
     private var uri: Uri? = null
     private var pageNumber = 0
@@ -130,6 +129,8 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
     private fun loadPDF(pdfConfigurator: Configurator, password: String? = null) {
         pdfConfigurator.defaultPage(pageNumber)
             .onPageChange(this)
+            .onTap(this)
+            .onLongPress(this)
             .enableAnnotationRendering(true)
             .onLoad(this)
             .scrollHandle(pdfScrollHandle)
@@ -216,5 +217,20 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         private const val MIN_ZOOM = 0.93f
         private const val MID_ZOOM = 3.0f
         private const val MAX_ZOOM = 6.0f
+    }
+
+    override fun onLongPress(e: MotionEvent?) {
+        if (e != null) {
+            val pdfPoint: PointF = binding.pdfView.convertCoords(e);
+            Log.d("PDF: LongPress", "("+pdfPoint.x+", "+pdfPoint.y+")")
+        };
+    }
+
+    override fun onTap(e: MotionEvent?): Boolean {
+        if (e != null) {
+            val pdfPoint: PointF = binding.pdfView.convertCoords(e);
+            Log.d("PDF: Tap", "("+pdfPoint.x+", "+pdfPoint.y+")")
+        };
+        return true
     }
 }

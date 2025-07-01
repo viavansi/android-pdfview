@@ -16,6 +16,7 @@
 package com.infomaniak.lib.pdfview;
 
 import android.graphics.Bitmap;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.SparseBooleanArray;
@@ -30,7 +31,7 @@ import com.shockwave.pdfium.util.SizeF;
 import java.util.ArrayList;
 import java.util.List;
 
-class PdfFile {
+public class PdfFile {
 
     private static final Object lock = new Object();
 
@@ -399,5 +400,10 @@ class PdfFile {
         }
 
         return documentPage;
+    }
+
+    public PointF mapDeviceCoordsToPage(int pageIndex, int startX, int startY, int sizeX,
+                                        int sizeY, int rotate, int deviceX, int deviceY) {
+        return pdfiumCore.mapDeviceCoordsToPage(pdfDocument, pageIndex, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
     }
 }

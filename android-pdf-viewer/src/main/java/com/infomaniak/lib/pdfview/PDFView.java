@@ -38,6 +38,7 @@ import android.os.Build;
 import android.os.HandlerThread;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.FloatRange;
@@ -459,6 +460,10 @@ public class PDFView extends RelativeLayout {
 
     public void stopFling() {
         animationManager.stopFling();
+    }
+
+    public PdfFile getPdfFile() {
+        return pdfFile;
     }
 
     public int getPageCount() {
@@ -1238,6 +1243,32 @@ public class PDFView extends RelativeLayout {
             return new SizeF(0, 0);
         }
         return pdfFile.getPageSize(pageIndex);
+    }
+
+    public PointF convertCoords(MotionEvent e) {
+        float mappedX = getCurrentXOffset()+e.getX();
+        float mappedY = getCurrentYOffset()+e.getY();
+        int page = pdfFile.getPageAtOffset( isSwipeVertical() ? mappedY : mappedX, getZoom());
+        SizeF pageSize = pdfFile.getScaledPageSize(page, getZoom());
+        float pageX, pageY;
+        if (isSwipeVertical()) {
+            pageX = pdfFile.getSecondaryPageOffset(page, getZoom());
+            pageY = pdfFile.getPageOffset(page, getZoom());
+        } else {
+            pageY = pdfFile.getSecondaryPageOffset(page, getZoom());
+            pageX = pdfFile.getPageOffset(page, getZoom());
+        }
+        PointF result = pdfFile.mapDeviceCoordsToPage(
+                page,
+                (int) pageX,
+                (int) pageY,
+                (int) pageSize.getWidth(),
+                (int) pageSize.getHeight(),
+                0,
+                (int) mappedX,
+                (int) mappedY
+        );
+        return result;
     }
 
     public int getCurrentPage() {
