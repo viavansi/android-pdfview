@@ -22,8 +22,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.PointF
+import android.graphics.*
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -36,8 +35,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.createBitmap
 import com.infomaniak.lib.pdfview.PDFView.Configurator
 import com.infomaniak.lib.pdfview.listener.*
+import com.infomaniak.lib.pdfview.model.PdfBitmap
 import com.infomaniak.lib.pdfview.sample.R
 import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -56,6 +57,45 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
     private val viewModel: PDFViewViewModel by viewModels()
 
     private val pdfScrollHandle by lazy { getScrollHandle() }
+
+    private val pdfBitmaps: Collection<PdfBitmap> = listOf(
+        PdfBitmap(
+            getYourCustomOverlayBitmap(),
+            100,
+            50,
+            20,
+            20,
+            0,
+            PdfBitmap.Type.SIGNATURE
+        ),
+        PdfBitmap(
+            getYourCustomOverlayBitmap(),
+            100,
+            50,
+            20,
+            20,
+            1,
+            PdfBitmap.Type.SIGNATURE
+        )
+    )
+
+    private fun getYourCustomOverlayBitmap(): Bitmap {
+        // Creamos el bitmap una sola vez para mejorar el rendimiento
+
+        val width = 1000
+        val height = 1000
+
+        // Crea un bitmap mutable
+        val myDotOverlayBitmap = createBitmap(width, height)
+
+        // Crea un Canvas para dibujar en el bitmap
+        val canvas = Canvas(myDotOverlayBitmap)
+
+        // Pinta el bitmap de negro
+        canvas.drawColor(Color.BLACK)
+
+        return myDotOverlayBitmap
+    }
 
     private val selectFileResult = registerForActivityResult(StartActivityForResult()) { activityResult ->
         if (activityResult.resultCode == RESULT_OK) {
@@ -126,6 +166,12 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
         loadPDF(binding.pdfView.fromUri(uri), password)
     }
 
+    private val overlayPaint = Paint().apply {
+        isFilterBitmap = true      // suaviza la escala
+        isAntiAlias = true         // antialiasing en dibujos
+        // puedes ajustar más flags según necesites
+    }
+
     private fun loadPDF(pdfConfigurator: Configurator, password: String? = null) {
         pdfConfigurator.defaultPage(pageNumber)
             .onPageChange(this)
@@ -142,6 +188,31 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
             .onPageError(this)
             .pageFitPolicy(FitPolicy.BOTH)
             .password(password)
+            .onDrawAll { canvas, pageWidth, pageHeight, page ->
+                for (pdfBitmap in pdfBitmaps) {
+                    if (pdfBitmap.pageNumber != page) {
+                        continue
+                    }
+                    // Calculate scale from PDF-space to screen-space
+                    val pdfPageSize = binding.pdfView.pdfFile.getPageSize(page)
+                    val scaleX = pageWidth / pdfPageSize.width
+                    val scaleY = pageHeight / pdfPageSize.height
+
+                    // Compute destination rectangle in screen pixels
+                    val left   = (pdfBitmap.pdfX * scaleX)
+                    val top    = (pdfBitmap.pdfY * scaleY)
+                    val right  = ((pdfBitmap.pdfX + pdfBitmap.width) * scaleX)
+                    val bottom = ((pdfBitmap.pdfY + pdfBitmap.height) * scaleY)
+
+                    // Draw the bitmap with correct scaling and positioning
+                    canvas.drawBitmap(
+                        pdfBitmap.bitmapImage,
+                        null,
+                        RectF(left, top, right, bottom),
+                        overlayPaint
+                    )
+                }
+            }
             .load()
     }
 
