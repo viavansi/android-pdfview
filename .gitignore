@@ -10,3 +10,4 @@ build/
 local.properties
 *.apk
 *.aab
+/android-pdf-viewer/gradle.properties

@@ -18,11 +18,11 @@ plugins {
     alias(libs.plugins.kapt)
 }
 
-val libMinSdk: Int by rootProject.extra
-val libCompileSdk: Int by rootProject.extra
-val libTargetSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
-val versionName: String by rootProject.extra
+val libMinSdk: Int = 21
+val libCompileSdk: Int = 34
+val libTargetSdk: Int = 34
+val javaVersion: JavaVersion = JavaVersion.VERSION_17
+val versionName: String = "3.2.12"
 
 android {
     namespace = "com.infomaniak.lib.pdfview.sample"
