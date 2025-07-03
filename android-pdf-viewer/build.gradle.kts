@@ -5,11 +5,12 @@ plugins {
     alias(libs.plugins.kapt)
 }
 
-val libMinSdk: Int by rootProject.extra
-val libCompileSdk: Int by rootProject.extra
-val libTargetSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
-val libVersionName: String by rootProject.extra
+val libMinSdk: Int = 21
+val libCompileSdk: Int = 34
+val libTargetSdk: Int = 34
+val libVersionName: String = "3.2.12"
+val javaVersion: JavaVersion = JavaVersion.VERSION_17
+
 
 android {
     namespace = "com.infomaniak.lib.pdfview"
@@ -44,14 +45,27 @@ dependencies {
     api(libs.pdfium)
 }
 
+// ./gradlew clean build publish -Prelease=true
+val isRelease = project.hasProperty("release") && project.findProperty("release").toString() == "true"
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("release") {
+            create<MavenPublication>("mavenAar") {
                 from(components.findByName("release")!!)
-                groupId = "com.github.Infomaniak"
+                groupId = "com.viafirma"
                 artifactId = "android-pdfview"
-                version = libVersionName
+                version = if (isRelease) libVersionName else "$libVersionName-SNAPSHOT"
+            }
+        }
+
+        repositories {
+            maven {
+                name = "viafirma"
+                url = uri(if (isRelease) properties["releaseUrl"].toString() else properties["snapshotUrl"].toString())
+                credentials {
+                    username = properties["repoUsername"].toString()
+                    password = properties["repoPassword"].toString()
+                }
             }
         }
     }
