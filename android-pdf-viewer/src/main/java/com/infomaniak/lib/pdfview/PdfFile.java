@@ -159,6 +159,23 @@ public class PdfFile {
         return pageSizes.get(pageIndex);
     }
 
+    /**
+     * Get page width & height in PostScript points (1/72th of an inch).<br>
+     * This method requires page to be opened.
+     */
+    public SizeF getPageSizePoint(int pageIndex) {
+        int docPage = documentPage(pageIndex);
+        if (docPage < 0) {
+            return new SizeF(0, 0);
+        }
+        if (pdfDocument == null) {
+            return new SizeF(0, 0);
+        }
+        int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageIndex);
+        int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageIndex);
+        return new SizeF(width, height);
+    }
+
     public SizeF getScaledPageSize(int pageIndex, float zoom) {
         SizeF size = getPageSize(pageIndex);
         return new SizeF(size.getWidth() * zoom, size.getHeight() * zoom);
@@ -402,8 +419,16 @@ public class PdfFile {
         return documentPage;
     }
 
+    /**
+     * @return Coordinates in pdf postscript system, but from Left-Top as origin
+     */
     public PointF mapDeviceCoordsToPage(int pageIndex, int startX, int startY, int sizeX,
-                                        int sizeY, int rotate, int deviceX, int deviceY) {
-        return pdfiumCore.mapDeviceCoordsToPage(pdfDocument, pageIndex, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
+                                        int sizeY, int rotate, int deviceX, int deviceY, boolean leftTop) {
+        PointF psPoint = pdfiumCore.mapDeviceCoordsToPage(pdfDocument, pageIndex, startX, startY, sizeX, sizeY, rotate, deviceX, deviceY);
+        if (leftTop) {
+            int pdfHeight = pdfiumCore.getPageHeightPoint(pdfDocument, pageIndex);
+            psPoint = new PointF(psPoint.x, pdfHeight - psPoint.y);
+        }
+        return psPoint;
     }
 }

@@ -1253,6 +1253,10 @@ public class PDFView extends RelativeLayout {
     }
 
     public PointF convertCoords(MotionEvent e) {
+        return convertCoords(e, true);
+    }
+
+    public PointF convertCoords(MotionEvent e, boolean leftTop) {
         float mappedX = -getCurrentXOffset()+e.getX();
         float mappedY = -getCurrentYOffset()+e.getY();
         int page = pdfFile.getPageAtOffset( isSwipeVertical() ? mappedY : mappedX, getZoom());
@@ -1265,7 +1269,7 @@ public class PDFView extends RelativeLayout {
             pageY = pdfFile.getSecondaryPageOffset(page, getZoom());
             pageX = pdfFile.getPageOffset(page, getZoom());
         }
-        PointF result = pdfFile.mapDeviceCoordsToPage(
+        PointF pdfPoint = pdfFile.mapDeviceCoordsToPage(
                 page,
                 (int) pageX,
                 (int) pageY,
@@ -1273,9 +1277,10 @@ public class PDFView extends RelativeLayout {
                 (int) pageSize.getHeight(),
                 0,
                 (int) mappedX,
-                (int) mappedY
+                (int) mappedY,
+                leftTop
         );
-        return result;
+        return new PointF(pdfPoint.x, pdfPoint.y);
     }
 
     public int getCurrentPage() {
