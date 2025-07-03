@@ -1,6 +1,7 @@
 package com.infomaniak.lib.pdfview.model;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -112,6 +113,20 @@ public class PdfBitmap implements Parcelable {
         this.isRemovable = isRemovable;
     }
 
+    public Rect getRect() {
+        return new Rect(pdfX - width / 2, pdfY - height / 2, pdfX + width / 2, pdfY + height / 2);
+    }
+
+    public Rect getZoomedRect(float scaleX, float scaleY) {
+        Rect bitmapRect = getRect();
+        return new Rect(
+                (int)(bitmapRect.left * scaleX),
+                (int)(bitmapRect.top * scaleY),
+                (int)(bitmapRect.right * scaleX),
+                (int)(bitmapRect.bottom * scaleY)
+        );
+    }
+
     public HashMap<String, String> getMetadata() {
         return this.metadata;
     }
@@ -141,6 +156,18 @@ public class PdfBitmap implements Parcelable {
         }
 
         return result;
+    }
+
+    public boolean intersect(Rect rect, int page) {
+        return pageNumber == page && rect.intersect(this.getRect());
+    }
+
+    public boolean intersect(PdfBitmap bitmap) {
+        return this.intersect(bitmap.getRect(), bitmap.pageNumber);
+    }
+
+    public boolean isInsideBounds(Rect rect) {
+        return rect.contains(this.getRect());
     }
 
     public static enum Type {

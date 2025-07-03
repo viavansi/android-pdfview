@@ -2,9 +2,7 @@ package com.infomaniak.lib.pdfview.util;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.infomaniak.lib.pdfview.PDFView;
 import com.infomaniak.lib.pdfview.model.PdfBitmap;
@@ -13,15 +11,15 @@ import com.shockwave.pdfium.util.SizeF;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class BitmapDrawer {
+public class PdfBitmapDrawer {
 
-    private final Collection<PdfBitmap> pdfBitmaps;
+    private Collection<PdfBitmap> pdfBitmaps;
     private final PDFView pdfView;
     private boolean allowOutOfBounds;
     private boolean allowOverlap;
     private Paint overlayPaint;
 
-    public BitmapDrawer(PDFView pdfView) {
+    public PdfBitmapDrawer(PDFView pdfView) {
         this.pdfBitmaps = new ArrayList<>();
         this.pdfView = pdfView;
         this.allowOutOfBounds = false;
@@ -30,7 +28,7 @@ public class BitmapDrawer {
         setup();
     }
 
-    public BitmapDrawer(PDFView pdfView, boolean allowOverlap, boolean allowOutOfBounds) {
+    public PdfBitmapDrawer(PDFView pdfView, boolean allowOverlap, boolean allowOutOfBounds) {
         this.pdfBitmaps = new ArrayList<>();
         this.pdfView = pdfView;
         this.allowOutOfBounds = allowOutOfBounds;
@@ -50,6 +48,10 @@ public class BitmapDrawer {
 
     public Collection<PdfBitmap> getPdfBitmaps() {
         return pdfBitmaps;
+    }
+
+    public void setPdfBitmaps(Collection<PdfBitmap> pdfBitmaps) {
+        this.pdfBitmaps = pdfBitmaps;
     }
 
     public Paint getOverlayPaint() {
