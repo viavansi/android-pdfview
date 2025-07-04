@@ -122,12 +122,20 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private Drawable getDefaultHandleBackgroundDrawable() {
-        int drawableResId = switch (handleAlign) {
-            case ALIGN_PARENT_LEFT -> R.drawable.default_scroll_handle_left;
-            case ALIGN_PARENT_RIGHT -> R.drawable.default_scroll_handle_right;
-            case ALIGN_PARENT_TOP -> R.drawable.default_scroll_handle_top;
-            default -> R.drawable.default_scroll_handle_bottom;
-        };
+        int drawableResId;
+        switch (handleAlign) {
+            case ALIGN_PARENT_LEFT:
+                drawableResId = R.drawable.default_scroll_handle_left;
+                break;
+            case ALIGN_PARENT_RIGHT:
+                drawableResId = R.drawable.default_scroll_handle_right;
+                break;
+            case ALIGN_PARENT_TOP:
+                drawableResId = R.drawable.default_scroll_handle_top;
+                break;
+            default:
+                drawableResId =R.drawable.default_scroll_handle_bottom;
+        }
         return getDrawable(drawableResId);
     }
 
@@ -205,11 +213,19 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
     }
 
     private int getPaddings() {
-        int paddings = switch (handleAlign) {
-            case ALIGN_PARENT_LEFT, ALIGN_PARENT_RIGHT -> handlePaddingTop + handlePaddingBottom;
-            case ALIGN_PARENT_TOP, ALIGN_PARENT_BOTTOM -> handlePaddingLeft + handlePaddingRight;
-            default -> 0;
-        };
+        int paddings;
+        switch (handleAlign) {
+            case ALIGN_PARENT_LEFT:
+            case ALIGN_PARENT_RIGHT:
+                paddings = handlePaddingTop + handlePaddingBottom;
+                break;
+            case ALIGN_PARENT_TOP:
+            case ALIGN_PARENT_BOTTOM:
+                paddings = handlePaddingLeft + handlePaddingRight;
+                break;
+            default:
+                paddings = 0;
+        }
         return Util.getDP(context, paddings);
     }
 
@@ -356,7 +372,8 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
 
         TouchUtils.handleTouchPriority(event, this, TOUCH_POINTER_COUNT, false, pdfView.isZooming());
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN: {
                 pdfView.stopFling();
                 handler.removeCallbacks(hidePageScrollerRunnable);
                 if (pdfView.isSwipeVertical()) {
@@ -366,7 +383,7 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
                 }
                 return true;
             }
-            case MotionEvent.ACTION_MOVE -> {
+            case MotionEvent.ACTION_MOVE: {
                 if (pdfView.isSwipeVertical()) {
                     setPosition(event.getRawY() - currentPos + relativeHandlerMiddle);
                     pdfView.setPositionOffset(relativeHandlerMiddle / getHeight(), false);
@@ -376,13 +393,15 @@ public class DefaultScrollHandle extends RelativeLayout implements ScrollHandle 
                 }
                 return true;
             }
-            case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP: {
                 hideDelayed();
                 pdfView.performPageSnap();
                 hasStartedDragging = false;
                 return true;
             }
-            default -> {
+            default: {
                 return super.onTouchEvent(event);
             }
         }

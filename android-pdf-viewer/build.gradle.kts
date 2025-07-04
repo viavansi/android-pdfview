@@ -9,7 +9,7 @@ val libMinSdk: Int = 21
 val libCompileSdk: Int = 34
 val libTargetSdk: Int = 34
 val libVersionName: String = "3.2.12"
-val javaVersion: JavaVersion = JavaVersion.VERSION_17
+val javaVersion: JavaVersion = JavaVersion.VERSION_1_8
 
 
 android {
