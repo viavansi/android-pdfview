@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath(libs.gradle)
+        classpath("com.android.tools.build:gradle:7.2.2")
     }
 }
 

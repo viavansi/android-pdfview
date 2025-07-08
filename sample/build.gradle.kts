@@ -13,15 +13,14 @@ repositories {
 
 plugins {
     id("com.android.application")
-
-    alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.kapt)
+    id("org.jetbrains.kotlin.kapt") version "2.0.21"
+    id("org.jetbrains.kotlin.android") version "2.0.21"
 }
 
 val libMinSdk: Int = 21
 val libCompileSdk: Int = 34
 val libTargetSdk: Int = 34
-val javaVersion: JavaVersion = JavaVersion.VERSION_17
+val javaVersion: JavaVersion = JavaVersion.VERSION_1_8
 val versionName: String = "3.2.12"
 
 android {
@@ -47,10 +46,10 @@ android {
 dependencies {
     implementation(project(":android-pdf-viewer"))
 
-    implementation(libs.activity.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.pdfium)
+    implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.github.infomaniak:pdfiumandroid:1.9.6")
 
-    annotationProcessor(libs.androidannotations)
+    annotationProcessor("org.androidannotations:androidannotations:4.8.0")
 }
