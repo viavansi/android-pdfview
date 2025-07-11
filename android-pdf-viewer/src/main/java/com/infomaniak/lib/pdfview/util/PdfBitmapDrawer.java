@@ -6,6 +6,7 @@ import android.graphics.Rect;
 
 import com.infomaniak.lib.pdfview.PDFView;
 import com.infomaniak.lib.pdfview.model.PdfBitmap;
+import com.shockwave.pdfium.util.Size;
 import com.shockwave.pdfium.util.SizeF;
 
 import java.util.ArrayList;
@@ -81,16 +82,13 @@ public class PdfBitmapDrawer {
     public void addBitmap(PdfBitmap newPdfBitmap) {
         boolean removed = false;
         if (!allowOverlap) {
-            for (PdfBitmap bitmap : pdfBitmaps) {
-                // Check if overlaps with previous bitmap
-                if (newPdfBitmap.intersect(bitmap)) {
-                    if (!bitmap.isRemovable()) {
-                        // Overlaps and can't remove. Do nothing.
-                        return;
-                    }
-                    pdfBitmaps.remove(bitmap);
+            PdfBitmap bitmapPresent = getBitmapInPosition(newPdfBitmap.getRect(), newPdfBitmap.getPageNumber());
+            if (bitmapPresent != null) {
+                if (bitmapPresent.isRemovable()) {
+                    pdfBitmaps.remove(bitmapPresent);
                     removed = true;
-                    break;
+                } else {
+                    return;
                 }
             }
         }
@@ -108,12 +106,24 @@ public class PdfBitmapDrawer {
         if (!removed) {
             pdfBitmaps.add(newPdfBitmap);
         }
+    }
+
+    public PdfBitmap getBitmapInPosition(Rect rect, int page) {
+        for (PdfBitmap bitmap : pdfBitmaps) {
+            // Check if overlaps with previous bitmap
+            if (bitmap.intersect(rect, page)) {
+                return bitmap;
+            }
+        }
+        return null;
+    }
+
+    public void redraw() {
         pdfView.invalidate();
     }
 
     public void removeBitmap(PdfBitmap pdfBitmap) {
         pdfBitmaps.remove(pdfBitmap);
-        pdfView.invalidate();
     }
 
     public void drawBitmapsOnLayer(Canvas canvas, float pageWidth, float pageHeight, int page) {
@@ -122,14 +132,11 @@ public class PdfBitmapDrawer {
                 continue;
             }
             // Calculate scale from PDF-space to screen-space
-            SizeF pdfPageSize = pdfView.getPdfFile().getPageSizePoint(page);
+            Size pdfPageSize = pdfView.getPdfFile().getPageSizePoint(page).toSize();
             float scaleX = pageWidth / pdfPageSize.getWidth();
             float scaleY = pageHeight / pdfPageSize.getHeight();
 
-            Rect bitmapRect = pdfBitmap.getZoomedRect(scaleX, scaleY);
-
-            overlayPaint.setFilterBitmap(true);
-            overlayPaint.setAntiAlias(true);
+            Rect bitmapRect = pdfBitmap.getZoomedRectInvertedY(scaleX, scaleY, pdfPageSize.getHeight());
 
             // Draw the bitmap with correct scaling and positioning
             canvas.drawBitmap(

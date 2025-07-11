@@ -117,8 +117,23 @@ public class PdfBitmap implements Parcelable {
         return new Rect(pdfX - width / 2, pdfY - height / 2, pdfX + width / 2, pdfY + height / 2);
     }
 
+    public Rect getRectInvertedY(int pageHeight) {
+        int newY = pageHeight - pdfY;
+        return new Rect(pdfX - width / 2, newY - height / 2, pdfX + width / 2, newY + height / 2);
+    }
+
     public Rect getZoomedRect(float scaleX, float scaleY) {
         Rect bitmapRect = getRect();
+        return new Rect(
+                (int)(bitmapRect.left * scaleX),
+                (int)(bitmapRect.top * scaleY),
+                (int)(bitmapRect.right * scaleX),
+                (int)(bitmapRect.bottom * scaleY)
+        );
+    }
+
+    public Rect getZoomedRectInvertedY(float scaleX, float scaleY, int pageHeight) {
+        Rect bitmapRect = getRectInvertedY(pageHeight);
         return new Rect(
                 (int)(bitmapRect.left * scaleX),
                 (int)(bitmapRect.top * scaleY),

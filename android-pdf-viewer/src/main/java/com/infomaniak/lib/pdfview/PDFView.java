@@ -1253,7 +1253,7 @@ public class PDFView extends RelativeLayout {
     }
 
     public PointF convertCoords(MotionEvent e) {
-        return convertCoords(e, true);
+        return convertCoords(e, false);
     }
 
     public PointF convertCoords(MotionEvent e, boolean leftTop) {

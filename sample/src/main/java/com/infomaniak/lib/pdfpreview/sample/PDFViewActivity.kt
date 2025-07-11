@@ -44,6 +44,7 @@ import com.infomaniak.lib.pdfview.sample.databinding.ActivityMainBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import com.infomaniak.lib.pdfview.scroll.ScrollHandle
 import com.infomaniak.lib.pdfview.util.FitPolicy
+import com.infomaniak.lib.pdfview.util.PdfBitmapDrawer
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfPasswordException
 
@@ -57,29 +58,10 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
     private val viewModel: PDFViewViewModel by viewModels()
 
     private val pdfScrollHandle by lazy { getScrollHandle() }
+    private var pdfBitmapDrawer: PdfBitmapDrawer? = null
 
-    private val pdfBitmaps: Collection<PdfBitmap> = listOf(
-        PdfBitmap(
-            getYourCustomOverlayBitmap(),
-            100,
-            50,
-            20,
-            20,
-            0,
-            PdfBitmap.Type.SIGNATURE
-        ),
-        PdfBitmap(
-            getYourCustomOverlayBitmap(),
-            100,
-            50,
-            20,
-            20,
-            1,
-            PdfBitmap.Type.SIGNATURE
-        )
-    )
 
-    private fun getYourCustomOverlayBitmap(): Bitmap {
+    private fun getYourCustomOverlayBitmap(color: Int = Color.BLACK): Bitmap {
         // Creamos el bitmap una sola vez para mejorar el rendimiento
 
         val width = 1000
@@ -92,7 +74,7 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
         val canvas = Canvas(myDotOverlayBitmap)
 
         // Pinta el bitmap de negro
-        canvas.drawColor(Color.BLACK)
+        canvas.drawColor(color)
 
         return myDotOverlayBitmap
     }
@@ -173,6 +155,7 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
     }
 
     private fun loadPDF(pdfConfigurator: Configurator, password: String? = null) {
+        pdfBitmapDrawer = PdfBitmapDrawer(binding.pdfView)
         pdfConfigurator.defaultPage(pageNumber)
             .onPageChange(this)
             .onTap(this)
@@ -189,29 +172,7 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
             .pageFitPolicy(FitPolicy.BOTH)
             .password(password)
             .onDrawAll { canvas, pageWidth, pageHeight, page ->
-                for (pdfBitmap in pdfBitmaps) {
-                    if (pdfBitmap.pageNumber != page) {
-                        continue
-                    }
-                    // Calculate scale from PDF-space to screen-space
-                    val pdfPageSize = binding.pdfView.pdfFile.getPageSize(page)
-                    val scaleX = pageWidth / pdfPageSize.width
-                    val scaleY = pageHeight / pdfPageSize.height
-
-                    // Compute destination rectangle in screen pixels
-                    val left   = (pdfBitmap.pdfX * scaleX)
-                    val top    = (pdfBitmap.pdfY * scaleY)
-                    val right  = ((pdfBitmap.pdfX + pdfBitmap.width) * scaleX)
-                    val bottom = ((pdfBitmap.pdfY + pdfBitmap.height) * scaleY)
-
-                    // Draw the bitmap with correct scaling and positioning
-                    canvas.drawBitmap(
-                        pdfBitmap.bitmapImage,
-                        null,
-                        RectF(left, top, right, bottom),
-                        overlayPaint
-                    )
-                }
+                pdfBitmapDrawer?.drawBitmapsOnLayer(canvas, pageWidth, pageHeight, page)
             }
             .load()
     }
@@ -296,7 +257,18 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
         if (e != null) {
             val pdfPoint: PointF = binding.pdfView.convertCoords(e)
             val page: Int = binding.pdfView.pageForCoords(e)
-            Log.d("PDF Debug: LongPress", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+
+            val pdfBitmap = PdfBitmap(
+                getYourCustomOverlayBitmap(Color.BLACK),
+                100,
+                50,
+                pdfPoint.x.toInt(),
+                pdfPoint.y.toInt(),
+                page,
+                PdfBitmap.Type.SIGNATURE
+            )
+            pdfBitmapDrawer?.addBitmap(pdfBitmap)
+            pdfBitmapDrawer?.redraw()
         }
     }
 
@@ -304,7 +276,18 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
         if (e != null) {
             val pdfPoint: PointF = binding.pdfView.convertCoords(e)
             val page: Int = binding.pdfView.pageForCoords(e)
-            Log.d("PDF Debug: Tap", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+
+            val pdfBitmap = PdfBitmap(
+                getYourCustomOverlayBitmap(Color.RED),
+                100,
+                50,
+                pdfPoint.x.toInt(),
+                pdfPoint.y.toInt(),
+                page,
+                PdfBitmap.Type.SIGNATURE
+            )
+            pdfBitmapDrawer?.addBitmap(pdfBitmap)
+            pdfBitmapDrawer?.redraw()
         }
         return true
     }
@@ -313,7 +296,18 @@ class PDFViewActivity : AppCompatActivity(), OnLongPressListener, OnDoubleTapLis
         if (e != null) {
             val pdfPoint: PointF = binding.pdfView.convertCoords(e)
             val page: Int = binding.pdfView.pageForCoords(e)
-            Log.d("PDF Debug: DoubleTap", "page: "+ page +", pdf coords: ("+pdfPoint.x+", "+pdfPoint.y+"), screen coords: ("+e.x+", "+e.y+")")
+
+            val pdfBitmap = PdfBitmap(
+                getYourCustomOverlayBitmap(Color.GREEN),
+                100,
+                50,
+                pdfPoint.x.toInt(),
+                pdfPoint.y.toInt(),
+                page,
+                PdfBitmap.Type.SIGNATURE
+            )
+            pdfBitmapDrawer?.addBitmap(pdfBitmap)
+            pdfBitmapDrawer?.redraw()
         }
         return true
     }
